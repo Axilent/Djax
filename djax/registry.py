@@ -4,7 +4,6 @@ Registry for Djax integrations.
 from django.conf import settings
 import inspect
 from django.db.models import Model
-from djax.content import AxilentContent
 import logging
 
 log = logging.getLogger('djax')
@@ -30,6 +29,8 @@ def build_registry():
     """
     Builds the registry.
     """
+    from djax.content import AxilentContent
+    
     for app_path in settings.INSTALLED_APPS:
         if app_path != 'djax': # don't load yourself
             try:
