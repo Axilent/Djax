@@ -12,7 +12,7 @@ log = logging.getLogger('djax')
 # ============
 # = Settings =
 # ============
-_endpoint = 'https://www.axilent.net'
+_endpoint = 'https://www.axilent.net/api'
 if hasattr(settings,'AXILENT_ENDPOINT') and settings.AXILENT_ENDPOINT:
     _endpoint = settings.AXILENT_ENDPOINT
 
@@ -28,7 +28,7 @@ _api_key = settings.AXILENT_API_KEY
 # ===========
 # = Clients =
 # ===========
-content_resource = ResourceClient(_endpoint,'axilent.content',_api_version,'content',auth_user=_api_key)
+content_resource = ResourceClient('%s/resource' % _endpoint,'axilent.content',_api_version,'content',auth_user=_api_key)
 content_api = HttpClient(_endpoint,'axilent.content',_api_version,auth_user=_api_key)
 
 # =============
