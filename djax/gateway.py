@@ -49,6 +49,9 @@ def is_update_available(content_type,content_key,last_updated):
                 return False
         else:
             return True
+    except ServiceException:
+        log.exception('Exception while checking for update availability for %s:%s' % (content_type,content_key))
+        return False
 
 def get_update(content_type,content_key):
     """
