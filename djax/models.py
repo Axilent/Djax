@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 import logging
 from datetime import datetime
 from djax import gateway
-from djax.registry import content_registry
+from djax.registry import content_registry, build_registry
 
 log = logging.getLogger('djax')
 
@@ -123,3 +123,9 @@ class ContentSyncLock(models.Model):
     Lock for a content sync.  Indicates a sync is under way.
     """
     token = models.CharField(max_length=100)
+
+
+# =================
+# = Registry Hook =
+# =================
+build_registry()
