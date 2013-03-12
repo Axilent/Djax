@@ -28,6 +28,7 @@ _api_key = settings.AXILENT_API_KEY
 # ===========
 # = Clients =
 # ===========
+print 'building resource and content api clients with auth user',_api_key
 content_resource = ResourceClient('%s/resource' % _endpoint,'axilent.content',_api_version,'content',auth_user=_api_key)
 content_api = HttpClient(_endpoint,'axilent.content',_api_version,auth_user=_api_key)
 
