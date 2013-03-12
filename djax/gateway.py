@@ -58,7 +58,7 @@ def get_update(content_type,content_key):
     Gets the specified content item from the server.
     """
     try:
-        content_data = content_resource.get(content_type_slug=slugify(content_type),content_key=content_key)
+        content_data = content_resource.get(params={'content_type_slug':slugify(content_type),'content_key':content_key})
         return content_data['data']
     except ServiceException:
         log.exception('Exception while retrieving content update from Axilent for %s:%s.' % (content_type,content_key))
