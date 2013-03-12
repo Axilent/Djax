@@ -36,9 +36,11 @@ def sync_content(token=None):
     if not token:
         token = uuid.uuid4().hex
     
+    print 'content sync'
     lock = ContentSyncLock.objects.create(token=token)
 
     for content_type in content_registry.keys():
+        print 'sync',content_type,'with axilent'
         content_keys = get_content_keys(content_type)
         
         for content_key in content_keys:
