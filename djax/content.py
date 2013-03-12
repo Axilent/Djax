@@ -1,7 +1,6 @@
 """
 Content sync for Djax
 """
-from djax.models import AxilentContentRecord, ContentSyncLock
 from djax.registry import content_registry
 from djax.gateway import get_content_keys
 import uuid
@@ -14,6 +13,7 @@ class AxilentContent(object):
         """
         Synchronizes the local content with the latest from Axilent.
         """
+        from djax.models import AxilentContentRecord
         # 1. Check status of content at Axilent project.  Abort if not updated later than ContentRecord.
         record = AxilentContentRecord.objects.get_record(self)
         if record.update_available():
@@ -28,6 +28,8 @@ def sync_content(token=None):
     """
     Synchronizes the local models with Axilent content.
     """
+    from djax.models import AxilentContentRecord, ContentSyncLock
+    
     if ContentSyncLock.objects.all().exists():
         return False # already sync locked
     
