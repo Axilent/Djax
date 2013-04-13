@@ -9,7 +9,7 @@ from djax import VERSION
 setup(
     name='Djax',
     version='.'.join(map(str,VERSION)),
-    description='Integrates Django projects with Axilent.'
+    description='Integrates Django projects with Axilent.',
     packages=['djax'],
     license='BSD',
     author='Loren Davie',
