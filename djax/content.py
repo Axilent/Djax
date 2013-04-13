@@ -2,7 +2,7 @@
 Content sync for Djax
 """
 from djax.registry import content_registry
-from djax.gateway import get_content_keys
+from djax.gateway import content_client
 import uuid
 
 class AxilentContent(object):
@@ -41,15 +41,15 @@ def sync_content(token=None):
 
     for content_type in content_registry.keys():
         print 'sync',content_type,'with axilent'
-        content_keys = get_content_keys(content_type)
+        content_keys = content_client.content_keys(content_type)
         
         for content_key in content_keys:
             try:
                 record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
                                                           axilent_content_key=content_key)
                 
-                if record.update_available():
-                    axilent_content = record.get_update()
+                axilent_content = record.get_update()
+                if axilent_content:
                     record.sync_content(axilent_content)
             except AxilentContentRecord.DoesNotExist:
                 # the axilent content does not exist locally - create

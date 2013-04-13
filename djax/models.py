@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 import logging
 from datetime import datetime
-from djax import gateway
+from djax.gateway import content_client
 from djax.registry import content_registry, build_registry
 
 log = logging.getLogger('djax')
@@ -68,13 +68,16 @@ class AxilentContentRecord(models.Model):
         """
         Determines if a new content update is available from Axilent.
         """
-        return gateway.is_update_available(self.axilent_content_type,self.axilent_content_key,self.updated)
-    
+        if content_client.latest_update(self.axilent_content_type,self.axilent_content_key):
+            return True
+        else:
+            return False
+
     def get_update(self):
         """
         Gets the updated content from Axilent.
         """
-        return gateway.get_update(self.axilent_content_type,self.axilent_content_key)
+        return content_client.latest_update(self.axilent_content_type,self.axilent_content_key)
     
     def sync_content(self,axilent_content):
         """
@@ -95,18 +98,16 @@ class AxilentContentRecord(models.Model):
         
         # Default the field map to the axilent fields
         if not field_map:
-            for key in axilent_content.keys():
+            for key in axilent_content.data.keys():
                 field_map[key] = key
         
         # Iterate through the field map and set the local model values from the incoming Axilent content
         for axilent_field, model_field in field_map.items():
             try:
-                value = axilent_content[axilent_field]
+                value = getattr(axilent_content,axilent_field)
                 setattr(local_model,model_field,value)
-            except KeyError:
-                log.exception('There is no field %s in the Axilent Content Model %s.' % (axilent_field,self.axilent_content_type))
             except AttributeError:
-                log.exception('There is no field %s in the local model %s.' % (model_field,unicode(local_model)))
+                log.exception('There is a mis-matched field')
             
         
         local_model.save()
