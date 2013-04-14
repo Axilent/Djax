@@ -14,7 +14,7 @@ log = logging.getLogger('djax')
 # ============
 # = Settings =
 # ============
-_endpoint = 'https://www.axilent.net/api'
+_endpoint = 'https://www.axilent.net'
 if hasattr(settings,'AXILENT_ENDPOINT') and settings.AXILENT_ENDPOINT:
     _endpoint = settings.AXILENT_ENDPOINT
 
