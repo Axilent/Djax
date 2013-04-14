@@ -44,15 +44,19 @@ def sync_content(token=None):
         content_keys = content_client.content_keys(content_type)
         
         for content_key in content_keys:
+            print 'syncing',content_key
             try:
                 record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
                                                           axilent_content_key=content_key)
                 
                 axilent_content = record.get_update()
+                print 'received update for',content_key
                 if axilent_content:
+                    print 'applying new data to',content_key
                     record.sync_content(axilent_content)
             except AxilentContentRecord.DoesNotExist:
                 # the axilent content does not exist locally - create
+                print 'creating new content record for',content_key
                 AxilentContentRecord.objects.create_model(content_type,content_key)
     
     lock.delete()
