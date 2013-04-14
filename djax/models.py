@@ -25,20 +25,20 @@ class AxilentContentRecordManager(models.Manager):
         """
         Creates a new model and accompaning content record for the axilent content.
         """
-        content_data = gateway.get_update(axilent_content_type,axilent_content_key)
+        content_data = content_client.get_content(axilent_content_type,axilent_content_key)
         model_class = content_registry[axilent_content_type]
         
         field_map = {}
         try:
             field_map = model_class.Axilent.field_map
         except AttributeError:
-            for key in content_data.keys():
+            for key in content_data.data.keys():
                 field_map[key] = key
         
         fields = {}
         for axilent_field,model_field in field_map.items():
             try:
-                fields[model_field] = content_data[axilent_field]
+                fields[model_field] = content_data.data[axilent_field]
             except KeyError:
                 pass
         
