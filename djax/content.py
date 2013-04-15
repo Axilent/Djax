@@ -19,6 +19,23 @@ class AxilentContent(object):
         if record.update_available():
             axilent_content = record.get_update() # 2. get the updated content from Axilent
             record.sync_content(axilent_content) # 3. write to the local model
+    
+    def to_content_dict(self):
+        """
+        Renders the local model as a content dictionary.
+        """
+        try:
+            content_dict = {}
+            for axilent_field, local_field in self.Axilent.field_map.items():
+                try:
+                    content_dict[axilent_field] = getattr(self,local_field)
+                except AttributeError:
+                    raise ValueError('The local field %s is not defined in this model.' % local_field)
+            
+            return content_dict
+        except AttributeError:
+            raise ValueError('You must define an Axilent field map to create a content dict from a local model.')
+            
 
 # ======================
 # = Content Operations =

@@ -116,6 +116,12 @@ class AxilentContentRecord(models.Model):
         
         return local_model
     
+    def get_local_model(self):
+        """
+        Gets the local model for this record.
+        """
+        return self.local_content_type.model_class().objects.get(pk=self.local_id)
+    
     class Meta:
         unique_together = (('local_content_type','local_id'),('axilent_content_type','axilent_content_key'))
 
