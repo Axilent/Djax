@@ -12,6 +12,17 @@ from djax.gateway import cx
 
 calendar_client = CalendarClient(cx)
 
+class CalendarEventManager(models.Manager):
+    """
+    Manager for calendar events.
+    """
+    def get_event_for_model(self,model):
+        """
+        Gets the calendar event associated with the specified model.
+        """
+        ctype = ContentType.objects.get_for_model(model)
+        return self.get(local_content_type=ctype,local_id=model.pk)
+
 class CalendarEvent(models.Model):
     """
     A local representation of a calendar.
@@ -24,6 +35,8 @@ class CalendarEvent(models.Model):
     recurrence_quantity = models.IntegerField(default=0)
     recurrence_unit = models.CharField(blank=True,null=True,max_length=100)
     recurrence_end = models.DateTimeField(blank=True, null=True)
+    
+    objects = CalendarEventManager()
     
     def _get_event_type(self):
         try:
@@ -72,3 +85,6 @@ class CalendarEvent(models.Model):
                                                          axilent_content_type=local_model.Axilent.content_type,
                                                          axilent_content_key=content_key,
                                                          updated=datetime.now())
+    
+    class Meta:
+        unique_together = (('local_content_type','local_id'),)
