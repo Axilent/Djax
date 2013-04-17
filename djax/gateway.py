@@ -33,39 +33,3 @@ _api_key = settings.AXILENT_API_KEY
 cx = AxilentConnection(_api_key,_api_version,_endpoint)
 
 content_client = ContentClient(cx)
-
-# =============
-# = Functions =
-# =============
-# def is_update_available(content_type,content_key,last_updated):
-#     """
-#     Determines if a newer update is available for the specified content item.
-#     """
-#     try:
-#         updated = c.latest_update(content_type,content_key)
-#         if updated:
-#             if updated > last_updated:
-#                 return True
-#             else:
-#                 return False
-#         else:
-#             return True
-#     except:
-#         log.exception('Exception while checking for update availability for %s:%s' % (content_type,content_key))
-#         return False
-# 
-# def get_update(content_type,content_key):
-#     """
-#     Gets the specified content item from the server.
-#     """
-#     try:
-#         return c.get_content(content_type,content_key)
-#     except:
-#         log.exception('Exception while retrieving content update from Axilent for %s:%s.' % (content_type,content_key))
-#         return {}
-# 
-# def get_content_keys(content_type):
-#     """
-#     Gets a list of content keys for the specified content type.
-#     """
-#     return c.content_keys(content_type)
