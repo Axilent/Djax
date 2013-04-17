@@ -9,6 +9,7 @@ from djax.content import AxilentContent
 from djax.registry import content_registry
 from pax.calendar import CalendarClient
 from djax.gateway import cx
+import uuid
 
 calendar_client = CalendarClient(cx)
 
@@ -45,7 +46,7 @@ class CalendarEvent(models.Model):
         except AttributeError:
             raise ValueError('For the local model %s you must set the Axilent event type.' % self.local_content_type.name)
     
-    def push_to_axilent(self):
+    def push_to_axilent(self,resource_models=None):
         """
         Pushes local data to Axilent.
         """
@@ -70,6 +71,11 @@ class CalendarEvent(models.Model):
                                          content=local_model.content_dict())
         
         except AxilentContentRecord.DoesNotExist:
+            resources = []
+            if resource_models:
+                for resource_model in resource_models:
+                    resources.append(CalendarResource.objects.resource_for_model(resource_model).profile)
+            
             # this is the first time this event has been sync'd
             content_key = calendar_client.create_event(self.calendar,
                                                        event_type,
@@ -78,13 +84,73 @@ class CalendarEvent(models.Model):
                                                        local_model.content_dict(),
                                                        recurrence_quantity=self.recurrence_quantity,
                                                        recurrence_unit=self.recurrence_unit,
-                                                       recurrence_end=self.recurrence_end)
+                                                       recurrence_end=self.recurrence_end,
+                                                       resources=resources)
             
             record = AxilentContentRecord.objects.create(local_content_type=self.local_content_type,
                                                          local_id=self.local_id,
                                                          axilent_content_type=local_model.Axilent.content_type,
                                                          axilent_content_key=content_key,
                                                          updated=datetime.now())
+        
+        def delete_event(self):
+            """
+            Deletes the event on Axilent.
+            """
+            try:
+                record = AxilentContentRecord.objects.get(local_content_type=self.local_content_type,
+                                                          local_id=self.local_id)
+                calendar_client.delete_event(self.calendar,record.axilent_content_key)
+                record.delete()
+                return True
+            except AxilentContentRecord.DoesNotExist:
+                return False
+        
+        def to_dict(self):
+            """
+            Returns a dictionary representation of this calendar event.
+            """
+            return {'calendar':self.calendar,
+                    'start':self.start,
+                    'end':self.end,
+                    'recurrence_quantity':self.recurrence_quantity,
+                    'recurrence_unit':self.recurrence_unit,
+                    'recurrence_end':self.recurrence_end}
+    
+    class Meta:
+        unique_together = (('local_content_type','local_id'),)
+
+
+class CalendarResourceManager(models.Manager):
+    """
+    Manager class for CalendarResource.
+    """
+    def resource_for_model(self,model):
+        """
+        Gets a resource for the specified model.
+        """
+        ctype = ContentType.objects.get_for_model(model)
+        try:
+            return self.get(local_content_type=ctype,local_id=model.pk)
+        except CalendarResource.DoesNotExist:
+            return self.create(profile=uuid.uuid4().hex,local_content_type=ctype,local_id=model.pk)
+    
+
+class CalendarResource(models.Model):
+    """
+    A resource - someone or something that can be booked on a calendar.
+    """
+    profile = models.CharField(unique=True, max_length=100)
+    local_content_type = models.ForeignKey(ContentType,related_name='calendar_resources')
+    local_id = models.IntegerField(unique=True)
+    
+    objects = CalendarResourceManager()
+    
+    def get_local(self):
+        """
+        Gets the local model for this resource.
+        """
+        return self.local_content_type.model_class().objects.get(pk=self.local_id)
     
     class Meta:
         unique_together = (('local_content_type','local_id'),)

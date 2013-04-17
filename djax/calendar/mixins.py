@@ -7,7 +7,7 @@ class AxilentCalendarEvent(object):
     """
     Adds calendar event sync functionality for the local model.
     """
-    def push_event(self,start,end,recurrence_quantity=None,recurrence_unit=None,recurrence_end=None):
+    def push_event(self,start,end,recurrence_quantity=None,recurrence_unit=None,recurrence_end=None,resources=None):
         """
         Pushes the associated event to Axilent.  Should be called AFTER saving the local event model.
         """
@@ -28,4 +28,25 @@ class AxilentCalendarEvent(object):
                                                      recurrence_unit=recurrence_unit,
                                                      recurrence_end=recurrence_end)
         
-        cal_event.push_to_axilent()
+        cal_event.push_to_axilent(resources=resources)
+    
+    def delete_event(self):
+        """
+        Deletes the associated event in the Axilent calendar.
+        """
+        try:
+            cal_event = CalendarEvent.objects.get_event_for_model(self)
+            cal_event.delete_event() # deletes on server
+            cal_event.delete()
+            return True
+        except CalendarEvent.DoesNotExist:
+            return False
+    
+    def get_event(self):
+        """
+        Gets the matching calendar event, or None if the event has not yet been pushed.
+        """
+        try:
+            return CalendarEvent.objects.get_event_for_model(self)
+        except CalendarEvent.DoesNotExist:
+            return None
