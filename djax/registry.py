@@ -32,15 +32,17 @@ def build_registry():
     from djax.content import AxilentContent
     
     for app_path in settings.INSTALLED_APPS:
-        if app_path != 'djax': # don't load yourself
+        if not ('djax' in app_path):
             try:
-                module = get_module('%s.models' % app_path)
-                for name, attribute in inspect.getmembers(module):
-                    if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,AxilentContent):
-                        # this is a content model, add to registry
-                        try:
-                            content_registry[attribute.Axilent.content_type] = attribute
-                        except AttributeError:
-                            raise MalformedRegistry('All Axilent content mappings must be defined with an "Axilent" inner class with a "content_type" attribute.')
+                app_module = get_module(app_path)
+                if hasattr(app_module,'models'):
+                    module = getattr(module,'models')
+                    for name, attribute in inspect.getmembers(module):
+                        if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,AxilentContent):
+                            # this is a content model, add to registry
+                            try:
+                                content_registry[attribute.Axilent.content_type] = attribute
+                            except AttributeError:
+                                raise MalformedRegistry('All Axilent content mappings must be defined with an "Axilent" inner class with a "content_type" attribute.')
             except ImportError:
                 log.warn('Cannot import %s.  Skipping.' % app_path)
