@@ -93,29 +93,29 @@ class CalendarEvent(models.Model):
                                                          axilent_content_key=content_key,
                                                          updated=datetime.now())
         
-        def delete_event(self):
-            """
-            Deletes the event on Axilent.
-            """
-            try:
-                record = AxilentContentRecord.objects.get(local_content_type=self.local_content_type,
-                                                          local_id=self.local_id)
-                calendar_client.delete_event(self.calendar,record.axilent_content_key)
-                record.delete()
-                return True
-            except AxilentContentRecord.DoesNotExist:
-                return False
-        
-        def to_dict(self):
-            """
-            Returns a dictionary representation of this calendar event.
-            """
-            return {'calendar':self.calendar,
-                    'start':self.start,
-                    'end':self.end,
-                    'recurrence_quantity':self.recurrence_quantity,
-                    'recurrence_unit':self.recurrence_unit,
-                    'recurrence_end':self.recurrence_end}
+    def delete_event(self):
+        """
+        Deletes the event on Axilent.
+        """
+        try:
+            record = AxilentContentRecord.objects.get(local_content_type=self.local_content_type,
+                                                      local_id=self.local_id)
+            calendar_client.delete_event(self.calendar,record.axilent_content_key)
+            record.delete()
+            return True
+        except AxilentContentRecord.DoesNotExist:
+            return False
+    
+    def to_dict(self):
+        """
+        Returns a dictionary representation of this calendar event.
+        """
+        return {'calendar':self.calendar,
+                'start':self.start,
+                'end':self.end,
+                'recurrence_quantity':self.recurrence_quantity,
+                'recurrence_unit':self.recurrence_unit,
+                'recurrence_end':self.recurrence_end}
     
     class Meta:
         unique_together = (('local_content_type','local_id'),)
