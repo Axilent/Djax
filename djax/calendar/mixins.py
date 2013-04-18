@@ -33,7 +33,7 @@ class AxilentCalendarEvent(object):
                                                      local_content_type=ctype,
                                                      local_id=self.pk)
         
-        cal_event.push_to_axilent(resources=resources)
+        cal_event.push_to_axilent(resource_models=resources)
     
     def delete_event(self):
         """
