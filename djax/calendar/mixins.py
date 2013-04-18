@@ -2,6 +2,7 @@
 Mixins to bind the local models to Axilent calendar functionality.
 """
 from djax.calendar.models import CalendarEvent
+from django.contrib.contenttypes.models import ContentType
 
 class AxilentCalendarEvent(object):
     """
@@ -21,12 +22,16 @@ class AxilentCalendarEvent(object):
             cal_event.recurrence_end = recurrence_end
             cal_event.save()
         except CalendarEvent.DoesNotExist:
+            ctype = ContentType.objects.get_for_model(self)
+            
             cal_event = CalendarEvent.objects.create(calendar=self.Axilent.calendar,
                                                      start=start,
                                                      end=end,
                                                      recurrence_quantity=recurrence_quantity,
                                                      recurrence_unit=recurrence_unit,
-                                                     recurrence_end=recurrence_end)
+                                                     recurrence_end=recurrence_end,
+                                                     local_content_type=ctype,
+                                                     local_id=self.pk)
         
         cal_event.push_to_axilent(resources=resources)
     
