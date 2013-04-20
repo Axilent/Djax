@@ -10,6 +10,9 @@ from djax.registry import content_registry
 from pax.calendar import CalendarClient
 from djax.gateway import cx
 import uuid
+import logging
+
+log = logging.getLogger('djax')
 
 calendar_client = CalendarClient(cx)
 
@@ -39,7 +42,9 @@ class CalendarEventManager(models.Manager):
             resource_keys = [CalendarResource.objects.resource_for_model(resource).profile for resource in resources]
         
         event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys)['events']
+        log.debug('Retrieved %d event keys from Axilent:%s' % (len(event_keys),str(event_keys)))
         records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
+        log.debug('Found %d content records corresponding to event keys.' % records.count())
         return [record.get_local_model() for record in records]
 
 class CalendarEvent(models.Model):
