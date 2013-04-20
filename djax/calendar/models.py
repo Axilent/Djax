@@ -23,6 +23,24 @@ class CalendarEventManager(models.Manager):
         """
         ctype = ContentType.objects.get_for_model(model)
         return self.get(local_content_type=ctype,local_id=model.pk)
+    
+    def list_events(self,calendar,start,end,event_types=None,resources=None):
+        """
+        Lists events between the specified date range for the specified calendar.
+        
+        If event_types are defined only events matching the specified types will be
+        returned.
+        
+        If resources are specified only events with bookings for the specified 
+        resources will be returned.
+        """
+        resource_keys = None
+        if resources:
+            resource_keys = [CalendarResource.objects.resource_for_model(resource).profile for resource in resources]
+        
+        event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys)
+        records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
+        return [record.get_local_model() for record in records]
 
 class CalendarEvent(models.Model):
     """
@@ -151,6 +169,16 @@ class CalendarResource(models.Model):
         Gets the local model for this resource.
         """
         return self.local_content_type.model_class().objects.get(pk=self.local_id)
+    
+    def sync(self):
+        """
+        Synchronizes this resource on Axilent.
+        """
+        try:
+            calendar_client.get_resource(self.profile)
+        except:
+            # not there - create
+            calendar_client.create_resource(self.profile,'%s:%d' % (self.local_content_type.name,self.local_id))
     
     class Meta:
         unique_together = (('local_content_type','local_id'),)

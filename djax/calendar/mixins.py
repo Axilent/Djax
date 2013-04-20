@@ -55,3 +55,23 @@ class AxilentCalendarEvent(object):
             return CalendarEvent.objects.get_event_for_model(self)
         except CalendarEvent.DoesNotExist:
             return None
+
+class AxilentCalendarResource(object):
+    """
+    A mixin for local models that are to be considered calendar resources.
+    """
+    def push_resource(self):
+        """
+        Creates the equivilent resource object on Axilent corresponding to the local model.
+        """
+        resource = CalendarResource.objects.resource_for_model(self)
+        return resource.sync()
+    
+    def resource_profile(self):
+        """
+        Gets the resource profile for this resource.
+        """
+        try:
+            return CalendarResource.objects.resource_for_model(self).profile
+        except CalendarResource.DoesNotExist:
+            return None
