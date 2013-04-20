@@ -38,7 +38,7 @@ class CalendarEventManager(models.Manager):
         if resources:
             resource_keys = [CalendarResource.objects.resource_for_model(resource).profile for resource in resources]
         
-        event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys)
+        event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys)['events']
         records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
         return [record.get_local_model() for record in records]
 
