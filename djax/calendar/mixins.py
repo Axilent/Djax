@@ -1,7 +1,7 @@
 """
 Mixins to bind the local models to Axilent calendar functionality.
 """
-from djax.calendar.models import CalendarEvent
+from djax.calendar.models import CalendarEvent, CalendarResource
 from django.contrib.contenttypes.models import ContentType
 
 class AxilentCalendarEvent(object):
