@@ -27,7 +27,7 @@ class CalendarEventManager(models.Manager):
         ctype = ContentType.objects.get_for_model(model)
         return self.get(local_content_type=ctype,local_id=model.pk)
     
-    def list_events(self,calendar,start,end,event_types=None,resources=None):
+    def list_events(self,calendar,start,end,event_types=None,resources=None,ical=False):
         """
         Lists events between the specified date range for the specified calendar.
         
@@ -41,11 +41,14 @@ class CalendarEventManager(models.Manager):
         if resources:
             resource_keys = [CalendarResource.objects.resource_for_model(resource).profile for resource in resources]
         
-        event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys)['events']
-        log.debug('Retrieved %d event keys from Axilent:%s' % (len(event_keys),str(event_keys)))
-        records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
-        log.debug('Found %d content records corresponding to event keys.' % records.count())
-        return [record.get_local_model() for record in records]
+        event_keys = calendar_client.list_events(calendar,start,end,event_types=event_types,resources=resource_keys,ical=ical)['events']
+        if ical:
+            return event_keys # this is actually the icalendar string
+        else:
+            log.debug('Retrieved %d event keys from Axilent:%s' % (len(event_keys),str(event_keys)))
+            records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
+            log.debug('Found %d content records corresponding to event keys.' % records.count())
+            return [record.get_local_model() for record in records]
 
 class CalendarEvent(models.Model):
     """
