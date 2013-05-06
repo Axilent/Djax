@@ -92,7 +92,7 @@ class Recipient(models.Model):
     class Meta:
         unique_together = (('local_content_type','local_id'),)
 
-class MessageManager(models.Model):
+class MessageManager(models.Manager):
     """
     Manager class for messages.
     """
