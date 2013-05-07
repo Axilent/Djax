@@ -87,7 +87,7 @@ class Recipient(models.Model):
         """
         Gets the local model corresponding to the recipient.
         """
-        self.local_content_type.model_class().objects.get(pk=self.local_id)
+        return self.local_content_type.model_class().objects.get(pk=self.local_id)
     
     class Meta:
         unique_together = (('local_content_type','local_id'),)
@@ -150,7 +150,7 @@ class Message(models.Model):
         """
         Gets the local model for this message.
         """
-        self.local_content_type.model_class().objects.get(pk=self.local_id)
+        return self.local_content_type.model_class().objects.get(pk=self.local_id)
     
     def update_received(self,recipient,read=True):
         """
