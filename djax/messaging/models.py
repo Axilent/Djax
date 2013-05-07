@@ -71,6 +71,14 @@ class Recipient(models.Model):
         
         return self.received_messages.all()
     
+    def mark_all_read(self):
+        """
+        Mark all received messages as read.
+        """
+        for received_message in ReceivedMessage.objects.filter(recipient=self):
+            received_message.unread = False
+            received_message.save()
+    
     def subscribe(self,topic):
         """
         Subscribes this recipient to a topic.

@@ -27,6 +27,13 @@ class AxilentRecipient(object):
         recipient = Recipient.objects.get_recipient(self)
         return recipient.inbox(unread_only=unread_only)
     
+    def mark_all_read(self):
+        """
+        Marks all received messages for this recipient as read.
+        """
+        recipient = Recipient.objects.get_recipient(self)
+        recipient.mark_all_read()
+    
     def subscribe(self,topic):
         """
         Subscribes this recipient to a topic.
