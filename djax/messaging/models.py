@@ -103,7 +103,7 @@ class MessageManager(models.Manager):
         """
         content = {}
         for key,value in message_model.Axilent.field_map.items():
-            content[value] = getattr(message_model,key)
+            content[value] = unicode(getattr(message_model,key))
         
         message_key = messaging_client.create_message(message_model.Axilent.message_bus,
                                                       message_model.Axilent.message_type,
