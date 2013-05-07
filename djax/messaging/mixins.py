@@ -13,6 +13,13 @@ class AxilentRecipient(object):
         """
         return Recipient.objects.push_recipient(self)
     
+    def get_recipient(self):
+        """
+        Gets the recipient.  Will raise exception if the
+        recipient hasn't yet been pushed to Axilent.
+        """
+        return Recipient.objects.get_recipient(self)
+    
     def inbox(self,unread_only=True):
         """
         Gets received messages for this recipient.
