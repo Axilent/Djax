@@ -48,6 +48,11 @@ class AxilentRecipient(object):
         recipient = Recipient.objects.get_recipient(self)
         recipient.unsubscribe(topic)
 
+class MessageNotReceived(Exception):
+    """
+    Indicates the message was not received.
+    """    
+
 class AxilentMessage(object):
     """
     Provides message functionality for a Django model.
@@ -97,5 +102,15 @@ class AxilentMessage(object):
         recip = recipient.get_recipient()
         message = Message.objects.message_for_model(self)
         message.delete_received(recip)
-        
-
+    
+    def get_received(self,recipient):
+        """
+        Gets the received message for the specified recipient.  If the
+        recipient has not received the message, will raise an exception.
+        """
+        try:
+            recip = recipient.get_recipient()
+            message = Message.objects.message_for_model(self)
+            return ReceivedMessage.objects.get(message=message,recipient=recip)
+        except ReceivedMessage.DoesNotExist:
+            raise MessageNotReceived
