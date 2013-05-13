@@ -1,7 +1,7 @@
 """
 Mixins for messaging functionality.
 """
-from djax.messaging.models import Recipient, Message
+from djax.messaging.models import Recipient, Message, ReceivedMessage
 
 class AxilentRecipient(object):
     """
