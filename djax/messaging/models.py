@@ -59,14 +59,14 @@ class Recipient(models.Model):
     
     objects = RecipientManager()
     
-    def inbox(self,unread_only=True,*message_models,**filters):
+    def inbox(self,*message_models,**filters):
         """
         Gets inbox messages for this recipient.  Filters apply to the local model.
         """
         if filters and not message_models:
             raise ValueError('You must specify at least one message model to use filters.')
         
-        received_messages = messaging_client.inbox(self.recipient_key,unread_only=unread_only)
+        received_messages = messaging_client.inbox(self.recipient_key)
         message_keys = [message_dict['message_key'] for message_dict in received_messages]
         messages = Message.objects.filter(message_key__in=message_keys)
         
