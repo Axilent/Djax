@@ -59,17 +59,31 @@ class Recipient(models.Model):
     
     objects = RecipientManager()
     
-    def inbox(self,unread_only=True):
+    def inbox(self,unread_only=True,*message_models,**filters):
         """
-        Gets inbox messages for this recipient.
+        Gets inbox messages for this recipient.  Filters apply to the local model.
         """
+        if filters and not message_models:
+            raise ValueError('You must specify at least one message model to use filters.')
+        
         received_messages = messaging_client.inbox(self.recipient_key,unread_only=unread_only)
         message_keys = [message_dict['message_key'] for message_dict in received_messages]
         messages = Message.objects.filter(message_key__in=message_keys)
+        
         for message in messages:
             ReceivedMessage.objects.get_or_create(message=message,recipient=self)
         
-        return self.received_messages.all()
+        if message_models:
+            messages = messages.filter(local_content_type__in=ContentType.objects.get_for_models(message_models))
+        
+        if filters:
+            local_ids = []
+            for message_content_type in ContentType.objects.get_for_models(message_models).values():
+                local_ids += [message_objects.pk for message_content_type.objects.filter(**filters)]
+            
+            messages = messages.filter(local_id__in=local_ids)
+        
+        return self.received_messages.filter(message__in=messages)
     
     def mark_all_read(self):
         """

@@ -20,12 +20,12 @@ class AxilentRecipient(object):
         """
         return Recipient.objects.get_recipient(self)
     
-    def inbox(self,unread_only=True):
+    def inbox(self,unread_only=True,*message_models,**filters):
         """
         Gets received messages for this recipient.
         """
         recipient = Recipient.objects.get_recipient(self)
-        return recipient.inbox(unread_only=unread_only)
+        return recipient.inbox(unread_only=unread_only,*message_models,**filters)
     
     def mark_all_read(self):
         """
