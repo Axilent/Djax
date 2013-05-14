@@ -78,8 +78,8 @@ class Recipient(models.Model):
         
         if filters:
             local_ids = []
-            for message_content_type in ContentType.objects.get_for_models(*message_models).values():
-                local_ids += [message_object.pk for message_object in message_content_type.objects.filter(**filters)]
+            for message_model in message_models:
+                local_ids += [message_object.pk for message_object in message_model.objects.filter(**filters)]
             
             messages = messages.filter(local_id__in=local_ids)
         
