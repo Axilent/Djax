@@ -74,7 +74,7 @@ class Recipient(models.Model):
             ReceivedMessage.objects.get_or_create(message=message,recipient=self)
         
         if message_models:
-            messages = messages.filter(local_content_type__in=ContentType.objects.get_for_models(message_models))
+            messages = messages.filter(local_content_type__in=ContentType.objects.get_for_models(*message_models))
         
         if filters:
             local_ids = []
