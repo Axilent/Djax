@@ -180,6 +180,12 @@ class Message(models.Model):
         for the specified recipient.
         """
         messaging_client.update_received_message(recipient.recipient_key,self.message_key,read=read)
+        try:
+            received_message = ReceivedMessage.objects.get(message=self,recipient=recipient)
+            received_message.unread = not read
+            received_message.save()
+        except ReceivedMessage.DoesNotExist:
+            pass
     
     def delete_received(self,recipient):
         """
