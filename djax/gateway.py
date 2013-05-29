@@ -8,6 +8,7 @@ from dateutil import parser
 
 from pax.client import AxilentConnection
 from pax.content import ContentClient
+from pax.library import LibraryClient
 
 log = logging.getLogger('djax')
 
@@ -27,9 +28,14 @@ if not hasattr(settings,'AXILENT_API_KEY') or not settings.AXILENT_API_KEY:
 
 _api_key = settings.AXILENT_API_KEY
 
+_library_api_key = settings.AXILENT_LIBRARY_API_KEY if hasattr(settings,'AXILENT_LIBRARY_API_KEY') else None
+
 # ===========
 # = Clients =
 # ===========
 cx = AxilentConnection(_api_key,_api_version,_endpoint)
+library_cx = AxilentConnection(_library_api_key,_api_version,_endpoint) if _library_api_key else None
 
 content_client = ContentClient(cx)
+library_client = LibraryClient(library_cx) if library_cx else None
+library_project = settings.AXILENT_LIBRARY_PROJECT is hasattr(settings,'AXILENT_LIBRARY_PROJECT') else None

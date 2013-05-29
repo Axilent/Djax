@@ -35,7 +35,16 @@ class AxilentContent(object):
             return content_dict
         except AttributeError:
             raise ValueError('You must define an Axilent field map to create a content dict from a local model.')
-            
+    
+    def push_to_library(self):
+        """
+        Pushes this model to the Axilent library, assuming library integration is enabled.
+        
+        Returns a 2-tuple of booleans indicating 1.  If the library was updated and 2. If the
+        content item was created on Axilent for the first time.
+        """
+        from djax.models import AxilentContentRecord
+        return AxilentContentRecord.objects.push_to_library(self)
 
 # ======================
 # = Content Operations =
