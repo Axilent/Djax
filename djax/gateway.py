@@ -38,4 +38,4 @@ library_cx = AxilentConnection(_library_api_key,_api_version,_endpoint) if _libr
 
 content_client = ContentClient(cx)
 library_client = LibraryClient(library_cx) if library_cx else None
-library_project = settings.AXILENT_LIBRARY_PROJECT is hasattr(settings,'AXILENT_LIBRARY_PROJECT') else None
+library_project = settings.AXILENT_LIBRARY_PROJECT if hasattr(settings,'AXILENT_LIBRARY_PROJECT') else None
