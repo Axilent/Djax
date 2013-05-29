@@ -64,6 +64,23 @@ class AxilentContentRecord(models.Model):
     
     objects = AxilentContentRecordManager()
     
+    def _fk_to_content_link(self,model):
+        """
+        Converts a local model (held as a foreign key reference) to an Axilent
+        content link in <content-type>:<content-key> format.
+        """
+        record = self.objects.get_record(model)
+        return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
+    
+    def _content_link_to_fk(self,content_link):
+        """
+        Converts a content link format string '<content-type>:<content-key>' to a local
+        model to be used as a foreign key.
+        """
+        ctype, ckey = content_link.split(':')
+        record = self.objects.get(axilent_content_type=ctype,axilent_content_key=ckey)
+        return record.get_local_model()
+    
     def update_available(self):
         """
         Determines if a new content update is available from Axilent.
@@ -121,6 +138,12 @@ class AxilentContentRecord(models.Model):
         Gets the local model for this record.
         """
         return self.local_content_type.model_class().objects.get(pk=self.local_id)
+    
+    def push_to_library(self):
+        """
+        Pushes the local model data to Axilent.
+        """
+        pass # TODO
     
     class Meta:
         unique_together = (('local_content_type','local_id'),('axilent_content_type','axilent_content_key'))
