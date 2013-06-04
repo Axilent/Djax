@@ -82,8 +82,11 @@ class AxilentContentRecordManager(models.Manager):
         content link in <content-type>:<content-key> format.
         """
         if isinstance(value,models.Model):
-            record = self.get_record(value)
-            return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
+            try:
+                record = self.get_record(value)
+                return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
+            except AxilentContentRecord.DoesNotExist:
+                return ''
         else:
             return value
     
