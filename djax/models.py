@@ -136,7 +136,7 @@ class AxilentContentRecordManager(models.Manager):
                 return (True,False)
             except AxilentContentRecord.DoesNotExist:
                 # this is new
-                local_content_type = ContentType.objects.get_for_model(local_model)
+                local_content_type = ContentType.objects.get_for_model(model)
                 axilent_content_type = model.Axilent.content_type
                 response = library_client.create_content(axilent_content_type,
                                                          library_project,
