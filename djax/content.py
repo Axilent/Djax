@@ -9,6 +9,28 @@ class AxilentContent(object):
     """
     Mixin to provide Axilent content sync services for Django models.
     """
+    def get_axilent_content_key(self):
+        """
+        Gets the axilent content key for this content.
+        """
+        from djax.models import AxilentContentRecord
+        try:
+            record = AxilentContentRecord.objects.get_record(self)
+            return record.axilent_content_key
+        except AxilentContentRecord.DoesNotExist:
+            return None
+        
+    def get_axilent_content_type(self):
+        """
+        Gets the axilent content type for this content.
+        """
+        from djax.models import AxilentContentRecord
+        try:
+            record = AxilentContentRecord.objects.get_record(self)
+            return record.axilent_content_type
+        except AxilentContentRecord.DoesNotExist:
+            return None
+    
     def sync_with_axilent(self):
         """
         Synchronizes the local content with the latest from Axilent.
