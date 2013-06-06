@@ -9,6 +9,7 @@ from dateutil import parser
 from pax.client import AxilentConnection
 from pax.content import ContentClient
 from pax.library import LibraryClient
+from pax.triggers import TriggerClient
 
 log = logging.getLogger('djax')
 
@@ -37,5 +38,6 @@ cx = AxilentConnection(_api_key,_api_version,_endpoint)
 library_cx = AxilentConnection(_library_api_key,_api_version,_endpoint) if _library_api_key else None
 
 content_client = ContentClient(cx)
+trigger_client = TriggerClient(cx)
 library_client = LibraryClient(library_cx) if library_cx else None
 library_project = settings.AXILENT_LIBRARY_PROJECT if hasattr(settings,'AXILENT_LIBRARY_PROJECT') else None
