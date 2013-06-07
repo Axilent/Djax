@@ -19,7 +19,8 @@ class TriggerClient(object):
                                'profile':profile,
                                'variables':variables,
                                'environment':environment,
-                               'identity':identity})
+                               'identity':identity},
+                               local_param_check=False)
 
 
     def profile(self):
