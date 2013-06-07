@@ -10,7 +10,7 @@ class TriggerClient(object):
     def __init__(self,axilent_connection):
         self.api = axilent_connection.http_client('axilent.triggers')
     
-    def trigger(self,category,action,profile=None,variables=None,environment=None,identity=None):
+    def trigger(self,category,action,profile=None,variables=None,environment={},identity=None):
         """
         Sends a trigger to Axilent.
         """
