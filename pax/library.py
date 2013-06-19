@@ -75,7 +75,7 @@ class LibraryClient(object):
         """
         Archives the content on Axilent.
         """
-        response = self.content_resource.delete(data={'content_type':content_type,
-                                                      'project':project,
-                                                      'key':content_key})
+        response = self.content_resource.delete(params={'content_type':content_type,
+                                                        'project':project,
+                                                        'key':content_key})
         return response['archived']
