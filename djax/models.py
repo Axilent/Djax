@@ -207,6 +207,12 @@ class AxilentContentRecord(models.Model):
         """
         return self.local_content_type.model_class().objects.get(pk=self.local_id)
     
+    def archive(self):
+        """
+        Archives the content on Axilent.
+        """
+        return library_client.archive_content(library_project,self.axilent_content_type,self.axilent_content_key)
+    
     class Meta:
         unique_together = (('local_content_type','local_id'),('axilent_content_type','axilent_content_key'))
 

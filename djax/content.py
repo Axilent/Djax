@@ -67,6 +67,15 @@ class AxilentContent(object):
         """
         from djax.models import AxilentContentRecord
         return AxilentContentRecord.objects.push_to_library(self)
+    
+    def archive(self):
+        """
+        Archives this content on Axilent.  Archived content will be removed from the workflow,
+        and will be un-deployed from any Deployment Targets where it has been deployed.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.archive()
 
 # ======================
 # = Content Operations =

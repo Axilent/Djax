@@ -70,3 +70,12 @@ class LibraryClient(object):
                                          tag=tag,
                                          search_index=search_index)
         return response['removed_tag']
+    
+    def archive_content(self,project,content_type,content_key):
+        """
+        Archives the content on Axilent.
+        """
+        response = self.content_resource.delete(data={'content_type':content_type,
+                                                      'project':project,
+                                                      'key':content_key})
+        return response['archived']
