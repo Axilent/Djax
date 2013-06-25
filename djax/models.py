@@ -187,11 +187,14 @@ class AxilentContentRecord(models.Model):
         local_model = self.get_local_model()
         field_map = local_model.Axilent.field_map
         
+        print 'syncing local content with field map',field_map
+        
         # Iterate through the field map and set the local model values from the incoming Axilent content
         for axilent_field, model_field in field_map.items():
             try:
                 value = getattr(axilent_content,axilent_field)
                 setattr(local_model,model_field,self.content_link_to_model(value))
+                print 'setting local model attribute',model_field,'with value',value
             except AttributeError:
                 log.exception('Local model has no field %s (matched to Axilent field %s).' % (model_field,axilent_field))
         
