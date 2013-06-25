@@ -178,7 +178,11 @@ class AxilentContentRecord(models.Model):
         """
         Gets the updated content from Axilent.
         """
-        return content_client.latest_update(self.axilent_content_type,self.axilent_content_key)
+        latest = content_client.latest_update(self.axilent_content_type,self.axilent_content_key)
+        if self.updated and self.updated >= latest:
+            return None
+        else:
+            return content_client.get_content(self.axilent_content_type,self.axilent_content_key)
     
     def sync_content(self,axilent_content):
         """
