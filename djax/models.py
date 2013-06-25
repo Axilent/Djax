@@ -185,7 +185,7 @@ class AxilentContentRecord(models.Model):
         Syncs the local content to the incoming axilent content (a dictionary).
         """
         local_model = self.get_local_model()
-        field_map = self.field_map()
+        field_map = local_model.Axilent.field_map
         
         # Iterate through the field map and set the local model values from the incoming Axilent content
         for axilent_field, model_field in field_map.items():
