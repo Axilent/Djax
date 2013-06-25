@@ -4,6 +4,9 @@ Content sync for Djax
 from djax.registry import content_registry
 from djax.gateway import content_client
 import uuid
+import logging
+
+log = logging.getLogger('djax')
 
 class AxilentContent(object):
     """
@@ -105,6 +108,7 @@ def sync_content(token=None):
                 
                 axilent_content = record.get_update()
                 if axilent_content:
+                    log.debug('About to sync local model with updated content %s.' % unicode(axilent_content))
                     record.sync_content(axilent_content)
             except AxilentContentRecord.DoesNotExist:
                 # the axilent content does not exist locally - create
