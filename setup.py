@@ -15,7 +15,7 @@ setup(
     author='Loren Davie',
     author_email='code@axilent.com',
     url='http://github.com/Axilent/Djax',
-    install_requires=['sharrock','Django','python-dateutil'],
+    install_requires=['sharrock-client','Django','python-dateutil'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',

@@ -152,6 +152,15 @@ class AxilentContentRecordManager(models.Manager):
                 return (True,True)
         else:
             return (False,False)
+    
+    def search(self,model_class,query):
+        """
+        Searches ACE and provides model instances that match the search results.
+        """
+        content_type = model_class.Axilent.content_type
+        search_results = content_client.search(query,content_type)
+        content_records = self.filter(axilent_content_type=content_type,axilent_content_key__in=[result.key for result in search_results])
+        return model_class.objects.filter(pk__in=[record.local_id for record in content_records])
 
 class AxilentContentRecord(models.Model):
     """

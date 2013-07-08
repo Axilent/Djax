@@ -5,6 +5,7 @@ from djax.registry import content_registry
 from djax.gateway import content_client
 import uuid
 import logging
+from django.db.models import Manager
 
 log = logging.getLogger('djax')
 
@@ -116,3 +117,17 @@ def sync_content(token=None):
     
     lock.delete()
     return True # sync occured
+
+# ===========================================
+# = Manager class provides Search Interface =
+# ===========================================
+class SearchManager(Manager):
+    """
+    A Manager class that provides access to the ACE search interface.
+    """
+    def search(self,query):
+        """
+        Returns models that correspond to the search results.
+        """
+        from djax.models import AxilentContentRecord
+        return AxilentContentRecord.objects.search(self.model,query)
