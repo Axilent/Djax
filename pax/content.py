@@ -45,6 +45,7 @@ class ChannelResult(object):
             self.flavor = data['meta']['flavor']
             self.channel = data['meta']['channel']
         else:
+            items = data
             self.flavor = None
             self.channel = None
         
