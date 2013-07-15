@@ -229,6 +229,18 @@ class AxilentContentRecord(models.Model):
         """
         return library_client.archive_content(library_project,self.axilent_content_type,self.axilent_content_key)
     
+    def tag(self,tag_term):
+        """
+        Applies tag term to content.
+        """
+        return library_client.tag_content(library_project,self.axilent_content_type,self.axilent_content_key,tag_term)
+    
+    def detag(self,tag_term):
+        """
+        Removes tag from the content.
+        """
+        return library_client.detag_content(library_project,self.axilent_content_type,self.axilent_content_key,tag_term)
+    
     class Meta:
         unique_together = (('local_content_type','local_id'),('axilent_content_type','axilent_content_key'))
 

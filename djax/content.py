@@ -80,6 +80,22 @@ class AxilentContent(object):
         from djax.models import AxilentContentRecord
         record = AxilentContentRecord.objects.get_record(self)
         record.archive()
+    
+    def tag(self,tag_term):
+        """
+        Tags this content.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.tag(tag_term)
+    
+    def detag(self,tag_term):
+        """
+        Disassociates the content from the specified tag term.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.detag(tag_term)
 
 # ======================
 # = Content Operations =
