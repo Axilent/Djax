@@ -52,7 +52,7 @@ class ChannelResult(object):
         self.items = [ContentImage(item_data) for item_data in items]
     
     def __iter__(self):
-        return self.items
+        return iter(self.items)
 
 class ContentClient(object):
     """
