@@ -2,6 +2,7 @@
 Mixins for messaging functionality.
 """
 from djax.messaging.models import Recipient, Message, ReceivedMessage
+from django.db import models
 
 class AxilentRecipient(object):
     """
@@ -114,3 +115,14 @@ class AxilentMessage(object):
             return ReceivedMessage.objects.get(message=message,recipient=recip)
         except ReceivedMessage.DoesNotExist:
             raise MessageNotReceived
+
+class MailSearchManager(models.Manager):
+    """
+    Adds mail search functionality.
+    """
+    def search(self,query):
+        """
+        Searchs for mail messages.
+        """
+        from djax.messaging.models import Message
+        return Message.objects.search(self.model,query)

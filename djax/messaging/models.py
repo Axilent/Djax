@@ -4,6 +4,7 @@ Models for Axilent messaging.
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from pax.messaging import MessagingClient
+from djax.gateway import content_client
 from djax.gateway import cx
 
 messaging_client = MessagingClient(cx)
@@ -144,6 +145,15 @@ class MessageManager(models.Manager):
         """
         ctype = ContentType.objects.get_for_model(message_model)
         return self.get(local_content_type=ctype,local_id=message_model.pk)
+    
+    def search(self,message_model,query):
+        """
+        Gets the messages for the specified query.
+        """
+        content_type = message_model.Axilent.content_type
+        search_results = content_client.search(query,content_type)
+        messages = self.filter(message_key__in=[result.key for result in search_results])
+        return message_model.objects.filter(pk__in=[message.local_id for message in messages])
 
 class Message(models.Model):
     """
