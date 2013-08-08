@@ -6,6 +6,8 @@ from djax.gateway import content_client
 import uuid
 import logging
 from django.db.models import Manager
+from django.contrib.contenttypes.models import ContentType
+from pax.util import slugify
 
 log = logging.getLogger('djax')
 
@@ -134,16 +136,97 @@ def sync_content(token=None):
     lock.delete()
     return True # sync occured
 
+# ===================
+# = Content Channel =
+# ===================
+class ContentChannel(object):
+    """
+    Accesses an ACE content channel.
+    """
+    def __init__(self,name,flavor=None,limit=0):
+        self.name = name
+        self.flavor = flavor
+        self.limit = limit
+        self.api = content_client
+    
+    def _build_params(self,**params):
+        p = {}
+        p['channel'] = slugify(self.name)
+        
+        if 'profile' in params:
+            p['profile'] = params['profile']
+        
+        if 'basekey' in params:
+            p['basekey'] = params['basekey']
+        
+        if 'flavor' in params or self.flavor:
+            p['flavor'] = params['flavor'] if 'flavor' in params else self.flavor
+        
+        if 'limit' in params or self.limit:
+            p['limit'] = params['limit'] if 'limit' in params else self.limit
+        
+        return p
+    
+    def get_content(self,queryset,profile=None,basekey=None,flavor=None,limit=0):
+        """
+        Gets content.  Flavor and limit params will override the defaults.
+        Extracts relevant content from the supplied queryset.
+        """
+        ctype = ContentType.objects.get_for_model(queryset.model)
+        params = self._build_params(profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        
+        axl_content_type = queryset.model.Axilent.content_type
+        
+        results = self.api.contentchannel(**params)
+        
+        local_ids = []
+        
+        for content, endorsement in results['default']:
+            content_type = content['content_type']
+            key = content['key']
+            try:
+                record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
+                                                          axilent_content_key=key)
+                local_ids.append(record.local_id)
+            except AxilentContentRecord.DoesNotExist:
+                log.warn('No local record of %s:%s, referenced by Content Channel %s' % (content_type,key,self.name))
+            
+        return queryset.filter(pk__in=local_ids)
+    
+    def __call__(self,queryset,profile=None,basekey=None,flavor=None,limit=0):
+        """
+        Function hook - passes through to get_content.
+        """
+        return self.get_content(queryset,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+
 # ===========================================
 # = Manager class provides Search Interface =
 # ===========================================
-class SearchManager(Manager):
+class ContentManager(Manager):
     """
-    A Manager class that provides access to the ACE search interface.
+    A Manager class that provides access to the ACE search interface and content channels.
     """
+    def __init__(self,channel=None,flavor=None,limit=0):
+        super(ContentManager,self).__init__()
+        
+        if channel:
+            self._channel = ContentChannel(channel,flavor=flavor,limit=limit)
+        else:
+            self._channel = None
+    
     def search(self,query):
         """
         Returns models that correspond to the search results.
         """
         from djax.models import AxilentContentRecord
         return AxilentContentRecord.objects.search(self.model,query)
+    
+    def channel(self,profile=None,basekey=None,flavor=None,limit=0):
+        """
+        Gets content matching the channel results
+        """
+        if not self._channel:
+            raise ValueError('No Content Channel has been set for this model. ')
+        
+        return self._channel(self.all(),profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        
