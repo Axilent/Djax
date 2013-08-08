@@ -143,15 +143,15 @@ class ContentChannel(object):
     """
     Accesses an ACE content channel.
     """
-    def __init__(self,name,flavor=None,limit=0):
+    def __init__(self,name=None,flavor=None,limit=0):
         self.name = name
         self.flavor = flavor
         self.limit = limit
         self.api = content_client
     
     def _build_params(self,**params):
-        p = {}
-        p['channel'] = slugify(self.name)
+        p = {}        
+        p['channel'] = slugify(params.get('channel',self.name))
         
         if 'profile' in params:
             p['profile'] = params['profile']
@@ -167,13 +167,13 @@ class ContentChannel(object):
         
         return p
     
-    def get_content(self,queryset,profile=None,basekey=None,flavor=None,limit=0):
+    def get_content(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0):
         """
         Gets content.  Flavor and limit params will override the defaults.
         Extracts relevant content from the supplied queryset.
         """
         ctype = ContentType.objects.get_for_model(queryset.model)
-        params = self._build_params(profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        params = self._build_params(channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
         
         axl_content_type = queryset.model.Axilent.content_type
         
@@ -193,11 +193,11 @@ class ContentChannel(object):
             
         return queryset.filter(pk__in=local_ids)
     
-    def __call__(self,queryset,profile=None,basekey=None,flavor=None,limit=0):
+    def __call__(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0):
         """
         Function hook - passes through to get_content.
         """
-        return self.get_content(queryset,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        return self.get_content(queryset,channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
 
 # ===========================================
 # = Manager class provides Search Interface =
@@ -210,9 +210,9 @@ class ContentManager(Manager):
         super(ContentManager,self).__init__()
         
         if channel:
-            self._channel = ContentChannel(channel,flavor=flavor,limit=limit)
+            self._channel = ContentChannel(channel=channel,flavor=flavor,limit=limit)
         else:
-            self._channel = None
+            self._channel = ContentChannel()
     
     def search(self,query):
         """
@@ -221,12 +221,12 @@ class ContentManager(Manager):
         from djax.models import AxilentContentRecord
         return AxilentContentRecord.objects.search(self.model,query)
     
-    def channel(self,profile=None,basekey=None,flavor=None,limit=0):
+    def channel(self,channel=None,profile=None,basekey=None,flavor=None,limit=0):
         """
         Gets content matching the channel results
         """
-        if not self._channel:
-            raise ValueError('No Content Channel has been set for this model. ')
+        if not self._channel.name and not channel:
+            raise ValueError('Content Channel not defined.  You must either specify it as an argument, or pass a default channel to the constructor.')
         
-        return self._channel(self.all(),profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        return self._channel(self.all(),channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
         
