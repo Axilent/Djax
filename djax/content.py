@@ -170,6 +170,8 @@ class ContentChannel(object):
         Gets content.  Flavor and limit params will override the defaults.
         Extracts relevant content from the supplied queryset.
         """
+        from djax.models import AxilentContentRecord
+        
         ctype = ContentType.objects.get_for_model(queryset.model)
         params = self._build_params(profile=profile,basekey=basekey,flavor=flavor,limit=limit)
         
