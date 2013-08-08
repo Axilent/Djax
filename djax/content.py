@@ -184,12 +184,10 @@ class ContentChannel(object):
         
         local_ids = []
         
-        for content, endorsement in results['default']:
-            content_type = content['content_type']
-            key = content['key']
+        for content_item in results.items:
             try:
-                record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
-                                                          axilent_content_key=key)
+                record = AxilentContentRecord.objects.get(axilent_content_type=content_item.content_type,
+                                                          axilent_content_key=content_item.key)
                 local_ids.append(record.local_id)
             except AxilentContentRecord.DoesNotExist:
                 log.warn('No local record of %s:%s, referenced by Content Channel %s' % (content_type,key,self.name))
