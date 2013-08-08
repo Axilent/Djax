@@ -150,9 +150,7 @@ class ContentChannel(object):
         self.api = content_client
     
     def _build_params(self,**params):
-        p = {}        
-        p['channel'] = slugify(params.get('channel',self.name))
-        
+        p = {}                
         if 'profile' in params:
             p['profile'] = params['profile']
         
@@ -173,11 +171,16 @@ class ContentChannel(object):
         Extracts relevant content from the supplied queryset.
         """
         ctype = ContentType.objects.get_for_model(queryset.model)
-        params = self._build_params(channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        params = self._build_params(profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        
+        if not channel and not self.name:
+            raise ValueError('Content Channel unspecified.  You must either specify the channel in the call or the constructor.')
+        
+        channel_slug = slugify(channel or self.channel)
         
         axl_content_type = queryset.model.Axilent.content_type
         
-        results = self.api.contentchannel(**params)
+        results = self.api.channel(channel_slug,**params)
         
         local_ids = []
         
