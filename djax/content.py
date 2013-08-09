@@ -184,17 +184,17 @@ class ContentChannel(object):
         
         results = self.api.channel(channel_slug,**params)
         
-        local_ids = []
+        return_set = []
         
         for content_item in results.items:
             try:
                 record = AxilentContentRecord.objects.get(axilent_content_type=content_item.content_type,
                                                           axilent_content_key=content_item.key)
-                local_ids.append(record.local_id)
+                return_set.append(record.get_local_model())
             except AxilentContentRecord.DoesNotExist:
                 log.warn('No local record of %s:%s, referenced by Content Channel %s' % (content_type,key,self.name))
             
-        return queryset.filter(pk__in=local_ids)
+        return return_set
     
     def __call__(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0):
         """
