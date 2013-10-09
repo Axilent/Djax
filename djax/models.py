@@ -260,7 +260,7 @@ class ProfileRecordManager(models.Manager):
         Gets or creates a profile record for the user.
         """
         try:
-            return self.get.(user=user).profile
+            return self.get(user=user).profile
         except ProfileRecord.DoesNotExist:
             profile = trigger_client.profile()
             record = self.create(user=user,profile=profile)
