@@ -2,7 +2,7 @@
 Content sync for Djax
 """
 from djax.registry import content_registry
-from djax.gateway import content_client
+from djax.gateway import content_client, trigger_client
 import uuid
 import logging
 from django.db.models import Manager
@@ -98,6 +98,28 @@ class AxilentContent(object):
         from djax.models import AxilentContentRecord
         record = AxilentContentRecord.objects.get_record(self)
         record.detag(tag_term)
+    
+    def trigger_affinity(self,profile,environment={},identity={}):
+        """
+        Sends affinity trigger for this content.
+        """
+        trigger_client.trigger('affinity',
+                               slugify(self.Axilent.content_type),
+                               profile=profile,
+                               variables={'key':self.get_axilent_content_key()},
+                               environment=environment,
+                               identity=identity)
+    
+    def trigger_ban(self,profile,environment={},identity={}):
+        """
+        Sends a ban trigger for this content.
+        """
+        trigger_client.trigger('ban',
+                               slugify(self.Axilent.content_type),
+                               profile=profile,
+                               variables={'key':self.get_axilent_content_key()},
+                               environment=environment,
+                               identity=identity)
 
 # ======================
 # = Content Operations =

@@ -3,9 +3,10 @@ Models for Djax.
 """
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 import logging
 from datetime import datetime
-from djax.gateway import content_client, library_client, library_project
+from djax.gateway import content_client, library_client, library_project, trigger_client
 from djax.registry import content_registry, build_registry
 import re
 
@@ -250,6 +251,32 @@ class ContentSyncLock(models.Model):
     """
     token = models.CharField(max_length=100)
 
+class ProfileRecordManager(models.Manager):
+    """
+    Manager for the profile record.
+    """
+    def for_user(self,user):
+        """
+        Gets or creates a profile record for the user.
+        """
+        try:
+            return self.get.(user=user).profile
+        except ProfileRecord.DoesNotExist:
+            profile = trigger_client.profile()
+            record = self.create(user=user,profile=profile)
+            return record.profile
+
+class ProfileRecord(models.Model):
+    """
+    A record associating a Django user with an ACE profile.
+    """
+    user = models.ForeignKey(User,related_name='ace_profile_record',unique=True)
+    profile = models.CharField(max_length=100)
+    
+    objects = ProfileRecordManager()
+    
+    def __unicode__(self):
+        return self.profile
 
 # =================
 # = Registry Hook =
