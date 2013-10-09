@@ -4,7 +4,7 @@ Decorators for Djax.  To be applied to views.
 from djax.models import ProfileRecord
 from djax.content import AxilentContent
 
-def affinity_trigger(model_class,id_position):
+def affinity_trigger(model_class,id_position=1):
     """
     Sends an affinity trigger for the identified model with the specified id name.
     The trigger will pull the id from the incoming argument to the view.
@@ -27,7 +27,7 @@ def affinity_trigger(model_class,id_position):
     
     return func_builder
 
-def ban_trigger(model_class,id_position):
+def ban_trigger(model_class,id_position=1):
     """
     Sends a ban trigger for the model.
     """
