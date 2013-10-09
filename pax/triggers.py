@@ -17,7 +17,6 @@ class TriggerClient(object):
         """
         Sends a trigger to Axilent.
         """
-        log.debug('Sending trigger with profile:%s' % unicode(profile))
         self.api.trigger(data={'category':category,
                                'action':action,
                                'profile':profile,
@@ -31,4 +30,4 @@ class TriggerClient(object):
         """
         Gets a profile to use with triggers and content channels.
         """
-        return self.api.profile()
+        return self.api.profile()['profile']
