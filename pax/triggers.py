@@ -2,6 +2,9 @@
 Triggers API.
 """
 from pax.exceptions import PaxException
+import logging
+
+log = logging.getLogger('djax')
 
 class TriggerClient(object):
     """
@@ -14,6 +17,7 @@ class TriggerClient(object):
         """
         Sends a trigger to Axilent.
         """
+        log.debug('Sending trigger with profile:%s' % unicode(profile))
         self.api.trigger(data={'category':category,
                                'action':action,
                                'profile':profile,
