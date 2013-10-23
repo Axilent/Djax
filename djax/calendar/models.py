@@ -27,7 +27,7 @@ class CalendarEventManager(models.Manager):
         ctype = ContentType.objects.get_for_model(model)
         return self.get(local_content_type=ctype,local_id=model.pk)
     
-    def list_events(self,calendar,start,end,event_types=None,resources=None,ical=False):
+    def list_events(self,calendar,start,end,event_types=[],resources=None,ical=False):
         """
         Lists events between the specified date range for the specified calendar.
         
