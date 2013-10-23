@@ -49,6 +49,14 @@ class CalendarEventManager(models.Manager):
             records = AxilentContentRecord.objects.filter(axilent_content_key__in=event_keys)
             log.debug('Found %d content records corresponding to event keys.' % records.count())
             return [record.get_local_model() for record in records]
+    
+    def check_availability(self,calendar,start,end,resources):
+        """
+        Checks resource availability for the specified date range.  Returns True or False,
+        depending on availability.
+        """
+        events = self.list_events(calendar,start,end,resources=resources)
+        return False if events else True
 
 class CalendarEvent(models.Model):
     """
