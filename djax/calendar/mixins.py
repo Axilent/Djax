@@ -75,3 +75,9 @@ class AxilentCalendarResource(object):
             return CalendarResource.objects.resource_for_model(self).profile
         except CalendarResource.DoesNotExist:
             return None
+    
+    def check_availability(self,calendar,start,end):
+        """
+        Checks if this resource is available during the specified date range.
+        """
+        return CalendarEvent.objects.check_availability(calendar,start,end,self)
