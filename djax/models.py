@@ -257,20 +257,42 @@ class ProfileRecordManager(models.Manager):
     """
     def for_user(self,user):
         """
-        Gets or creates a profile record for the user.
+        Gets or creates a profile record for the user.  User may not be anonymous for this call.
         """
+        if user.is_anonymous():
+            raise ValueError('You cannon use an anonymous user for the ProfileRecord.objects.for_user() method.')
+        
         try:
-            return self.get(user=user).profile
+            return (self.get(user=user).profile,False)
         except ProfileRecord.DoesNotExist:
             profile = trigger_client.profile()
             record = self.create(user=user,profile=profile)
-            return record.profile
+            return (record.profile,True)
+    
+    def for_request(self,request):
+        """
+        Gets or creates a profile from the request object.  Will attempt to use profile record
+        registered with a logged in user, failing that will fall back to a cookie.
+        
+        Returns a tuple of the ProfileRecord and a boolean flag indicating if the record
+        was just created.
+        """
+        if not request.user.is_anonymous():
+            return self.for_user(request.user)
+        
+        profile = request.COOKIES.get('axilent-profile',None)
+        profile_record = None
+        if profile:
+            return self.get_or_create(profile=profile)
+        else:
+            profile_record = self.create(profile=trigger_client.profile())
+            return (profile_record,True)
 
 class ProfileRecord(models.Model):
     """
     A record associating a Django user with an ACE profile.
     """
-    user = models.ForeignKey(User,related_name='ace_profile_record',unique=True)
+    user = models.ForeignKey(User,related_name='ace_profile_record',unique=True,null=True)
     profile = models.CharField(max_length=100)
     
     objects = ProfileRecordManager()

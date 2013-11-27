@@ -48,3 +48,15 @@ def ban_trigger(model_class,id_name):
         return view
     
     return func_builder
+
+def ensure_profile(view):
+    """
+    Extracts or creates profile.  Will be passed to wrapped view as 'ace_profile'
+    keyword argument.
+    """
+    def wrapper(request,*args,**kwargs):
+        record, created = ProfileRecord.objects.for_request(request)
+        response = view(request,ace_profile=record.profile,*args,**kwargs)
+        if created:
+            response.set_cookie('ace-profile',record.profile)
+        return response
