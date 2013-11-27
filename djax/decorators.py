@@ -60,3 +60,5 @@ def ensure_profile(view):
         if created:
             response.set_cookie('ace-profile',record.profile)
         return response
+    
+    return wrapper
