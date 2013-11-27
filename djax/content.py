@@ -214,7 +214,7 @@ class ContentChannel(object):
                                                           axilent_content_key=content_item.key)
                 return_set.append(record.get_local_model())
             except AxilentContentRecord.DoesNotExist:
-                log.warn('No local record of %s:%s, referenced by Content Channel %s' % (content_type,key,self.name))
+                log.warn('No local record of %s:%s, referenced by Content Channel %s' % (axl_content_type,key,self.name))
             
         return return_set
     
