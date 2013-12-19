@@ -230,11 +230,15 @@ class AxilentContentRecord(models.Model):
         """
         return library_client.archive_content(library_project,self.axilent_content_type,self.axilent_content_key)
     
-    def tag(self,tag_term):
+    def tag(self,tag_term,update_library_index=True):
         """
         Applies tag term to content.
         """
-        return library_client.tag_content(library_project,self.axilent_content_type,self.axilent_content_key,tag_term)
+        return library_client.tag_content(library_project,
+                                          self.axilent_content_type,
+                                          self.axilent_content_key,
+                                          tag_term,
+                                          search_index=update_library_index)
     
     def detag(self,tag_term):
         """

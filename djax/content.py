@@ -83,13 +83,14 @@ class AxilentContent(object):
         record = AxilentContentRecord.objects.get_record(self)
         record.archive()
     
-    def tag(self,tag_term):
+    def tag(self,tag_term,update_library_index=True):
         """
-        Tags this content.
+        Tags this content.  If update_library_index is set to false then the
+        tagging will not update the library search index for the content item.
         """
         from djax.models import AxilentContentRecord
         record = AxilentContentRecord.objects.get_record(self)
-        record.tag(tag_term)
+        record.tag(tag_term,update_library_index=update_library_index)
     
     def detag(self,tag_term):
         """
