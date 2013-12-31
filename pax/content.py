@@ -73,7 +73,7 @@ class ContentClient(object):
         """
         Creates a new content item.
         """
-        response = self.content_resource.push(params={'content_type_slug':slugify(content_type),
+        response = self.content_resource.post(params={'content_type_slug':slugify(content_type),
                                                       'content':content})
         return response['created']
     
