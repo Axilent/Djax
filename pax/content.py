@@ -73,17 +73,17 @@ class ContentClient(object):
         """
         Creates a new content item.
         """
-        response = self.content_resource.post(params={'content_type_slug':slugify(content_type),
-                                                      'content':content})
+        response = self.content_resource.post(data={'content_type_slug':slugify(content_type),
+                                                    'content':content})
         return response['created']
     
     def update_content(self,content_type,key,**content):
         """
         Updates content.
         """
-        response = self.content_resource.put(params={'content_type_slug':slugify(content_type),
-                                                     'content_key':key,
-                                                     'content':content})
+        response = self.content_resource.put(data={'content_type_slug':slugify(content_type),
+                                                   'content_key':key,
+                                                   'content':content})
         return response['updated']
     
     def delete_content(self,content_type,key):
