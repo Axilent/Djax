@@ -117,8 +117,7 @@ class ContentClient(object):
         Forces content to re-index for search.
         """
         response = self.api.reindexcontent(content_type_slug=slugify(content_type),
-                                           content_key=key,
-                                           tag=tag)
+                                           content_key=key)
         return response['reindexed']
         
     def channel_group(self,group,profile=None,basekey=None,limit=None,flavor=None):
