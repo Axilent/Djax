@@ -154,6 +154,38 @@ class AxilentContentRecordManager(models.Manager):
         else:
             return (False,False)
     
+    def push_to_graphstack(self,model):
+        """
+        Pushes the model to the graphstack associated with the content client.  Like push_to_library
+        will return a 2-tuple, indicating (1) if the graphstack was updated and (2) if it was
+        created for the first time.
+        """
+        if content_client:
+            data = self.data_for_library(model)
+            try:
+                record = self.get_record(model)
+                # this content item exists in ACE, try to update
+                response = content_client.update_content(record.axilent_content_type,
+                                                         record.axilent_content_key,
+                                                         **data)
+                return (True,False)
+            except AxilentContentRecord.DoesNotExist:
+                # new content
+                local_content_type = ContentType.objects.get_for_model(model)
+                axilent_content_type = model.Axilent.content_type
+                response = content_client.create_content(axilent_content_type,
+                                                         **data)
+                
+                # create new record
+                self.create(local_content_type=local_content_type,
+                            local_id=model.pk,
+                            axilent_content_type=axilent_content_type,
+                            axilent_content_key=response)
+                
+                return (True,True)
+        else:
+            return (False,False)
+    
     def search(self,model_class,query):
         """
         Searches ACE and provides model instances that match the search results.
@@ -245,6 +277,24 @@ class AxilentContentRecord(models.Model):
         Removes tag from the content.
         """
         return library_client.detag_content(library_project,self.axilent_content_type,self.axilent_content_key,tag_term)
+    
+    def live_tag(self,tag_term):
+        """
+        Tags the deployed version of the content in the graphstack.
+        """
+        return content_client.tag_content(self.axilent_content_type,self.axilent_content_key,tag_term)
+    
+    def live_detag(self,tag_term):
+        """
+        De-tags the deployed veresion of the content in the graphstack.
+        """
+        return content_client.detag_content(self.axilent_content_type,self.axilent_content_key,tag_term)
+    
+    def reindex(self):
+        """
+        Re-indexes the deployed content for search.
+        """
+        return content_client.reindex_content(self.axilent_content_type,self.axilent_content_key)
     
     class Meta:
         unique_together = (('local_content_type','local_id'),('axilent_content_type','axilent_content_key'))

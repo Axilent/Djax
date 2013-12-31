@@ -74,6 +74,13 @@ class AxilentContent(object):
         from djax.models import AxilentContentRecord
         return AxilentContentRecord.objects.push_to_library(self)
     
+    def push_to_graphstack(self):
+        """
+        Pushes this model to the graphstack associated with the active content client.
+        """
+        from djax.models import AxilentContentRecord
+        return AxilentContentRecord.objects.push_to_graphstack(self)
+    
     def archive(self):
         """
         Archives this content on Axilent.  Archived content will be removed from the workflow,
@@ -99,6 +106,30 @@ class AxilentContent(object):
         from djax.models import AxilentContentRecord
         record = AxilentContentRecord.objects.get_record(self)
         record.detag(tag_term)
+    
+    def live_tag(self,tag_term):
+        """
+        Tags the deployed version of the content.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.live_tag(tag_term)
+    
+    def live_detag(self,tag_term):
+        """
+        De-tags the deployed version of the content.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.live_detag(tag_term)
+    
+    def reindex_search(self):
+        """
+        Re-indexes the deployed version of the content for search.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.reindex()
     
     def trigger_affinity(self,profile,environment={},identity={}):
         """

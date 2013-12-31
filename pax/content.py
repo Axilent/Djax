@@ -69,6 +69,58 @@ class ContentClient(object):
         data = self.content_resource.get(params={'content_type_slug':slugify(content_type),'content_key':key})
         return ContentImage(data)
     
+    def create_content(self,content_type,**content):
+        """
+        Creates a new content item.
+        """
+        response = self.content_resource.push(params={'content_type_slug':slugify(content_type),
+                                                      'content':content})
+        return response['created']
+    
+    def update_content(self,content_type,key,**content):
+        """
+        Updates content.
+        """
+        response = self.content_resource.put(params={'content_type_slug':slugify(content_type),
+                                                     'content_key':key,
+                                                     'content':content})
+        return response['updated']
+    
+    def delete_content(self,content_type,key):
+        """
+        Deletes the specified content.
+        """
+        response = self.content_resource.delete(params={'content_type_slug':slugify(content_type),
+                                                        'content_key':key})
+        return response['deleted']
+    
+    def tag_content(self,content_type,key,tag):
+        """
+        Tags the specified content.
+        """
+        response = self.api.tagcontent(content_type_slug=slugify(content_type),
+                                       content_key=key,
+                                       tag=tag)
+        return response['tagged']
+    
+    def detag_content(self,content_type,key,tag):
+        """
+        De-tags the content.
+        """
+        response = self.api.detagcontent(content_type_slug=slugify(content_type),
+                                         content_key=key,
+                                         tag=tag)
+        return response['detagged']
+    
+    def reindex_content(self,content_type,key):
+        """
+        Forces content to re-index for search.
+        """
+        response = self.api.reindexcontent(content_type_slug=slugify(content_type),
+                                           content_key=key,
+                                           tag=tag)
+        return response['reindexed']
+        
     def channel_group(self,group,profile=None,basekey=None,limit=None,flavor=None):
         """
         Gets content from a Content Channel Group.
