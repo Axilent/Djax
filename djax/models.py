@@ -262,6 +262,12 @@ class AxilentContentRecord(models.Model):
         """
         return library_client.archive_content(library_project,self.axilent_content_type,self.axilent_content_key)
     
+    def live_delete(self):
+        """
+        Deletes the deployed version of this content from ACE.
+        """
+        return content_client.delete_content(self.axilent_content_type,self.axilent_content_key)
+    
     def tag(self,tag_term,update_library_index=True):
         """
         Applies tag term to content.

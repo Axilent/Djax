@@ -90,6 +90,15 @@ class AxilentContent(object):
         record = AxilentContentRecord.objects.get_record(self)
         record.archive()
     
+    def live_delete(self):
+        """
+        Deletes the deployed version of the content on the active graphstack.
+        """
+        from djax.models import AxilentContentRecord
+        record = AxilentContentRecord.objects.get_record(self)
+        record.live_delete()
+        record.delete()
+    
     def tag(self,tag_term,update_library_index=True):
         """
         Tags this content.  If update_library_index is set to false then the
