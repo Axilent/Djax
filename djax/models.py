@@ -1,7 +1,7 @@
 """
 Models for Djax.
 """
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 import logging
@@ -145,12 +145,16 @@ class AxilentContentRecordManager(models.Manager):
                 returned_content_type, returned_key = response.split(':')
                 
                 # create new record
-                self.create(local_content_type=local_content_type,
-                            local_id=model.pk,
-                            axilent_content_type=axilent_content_type,
-                            axilent_content_key=returned_key)
+                try:
+                    self.create(local_content_type=local_content_type,
+                                local_id=model.pk,
+                                axilent_content_type=axilent_content_type,
+                                axilent_content_key=returned_key)
                 
-                return (True,True)
+                    return (True,True)
+                except IntegrityError:
+                    # product of race condition, record created by another thread
+                    return (False,False)
         else:
             return (False,False)
     
@@ -177,12 +181,16 @@ class AxilentContentRecordManager(models.Manager):
                                                          **data)
                 
                 # create new record
-                self.create(local_content_type=local_content_type,
-                            local_id=model.pk,
-                            axilent_content_type=axilent_content_type,
-                            axilent_content_key=response)
+                try:
+                    self.create(local_content_type=local_content_type,
+                                local_id=model.pk,
+                                axilent_content_type=axilent_content_type,
+                                axilent_content_key=response)
                 
-                return (True,True)
+                    return (True,True)
+                except IntegrityError:
+                    # product of a race condition, record created by another thread
+                    return (False,False)
         else:
             return (False,False)
     
