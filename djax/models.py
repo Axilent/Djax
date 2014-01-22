@@ -9,6 +9,7 @@ from datetime import datetime
 from djax.gateway import content_client, library_client, library_project, trigger_client
 from djax.registry import content_registry, build_registry
 import re
+import threading
 
 log = logging.getLogger('djax')
 
@@ -16,6 +17,10 @@ class AxilentContentRecordManager(models.Manager):
     """
     Manager class for AxilentContentRecord.
     """
+    def __init__(self,*args,**kwargs):
+        super(AxilentContentRecordManager,self).__init__(*args,**kwargs)
+        self.lock = threading.RLock()
+    
     def get_record(self,model):
         """
         Gets the record for the specified model.
@@ -126,35 +131,33 @@ class AxilentContentRecordManager(models.Manager):
         
         """
         if library_client:
-            lib_data = self.data_for_library(model)
-            try:
-                record = self.get_record(model)
-                # this content item already exists on Axilent - update
-                response = library_client.update_content(record.axilent_content_type,
-                                                         library_project,
-                                                         record.axilent_content_key,
-                                                         **lib_data)
-                return (True,False)
-            except AxilentContentRecord.DoesNotExist:
-                # this is new
-                local_content_type = ContentType.objects.get_for_model(model)
-                axilent_content_type = model.Axilent.content_type
-                response = library_client.create_content(axilent_content_type,
-                                                         library_project,
-                                                         **lib_data)
-                returned_content_type, returned_key = response.split(':')
-                
-                # create new record
+            with lock:
+                lib_data = self.data_for_library(model)
                 try:
+                    record = self.get_record(model)
+                    # this content item already exists on Axilent - update
+                    response = library_client.update_content(record.axilent_content_type,
+                                                             library_project,
+                                                             record.axilent_content_key,
+                                                             **lib_data)
+                    return (True,False)
+                except AxilentContentRecord.DoesNotExist:
+                    # this is new
+                    local_content_type = ContentType.objects.get_for_model(model)
+                    axilent_content_type = model.Axilent.content_type
+                    response = library_client.create_content(axilent_content_type,
+                                                             library_project,
+                                                             **lib_data)
+                    returned_content_type, returned_key = response.split(':')
+                
+                    # create new record
                     self.create(local_content_type=local_content_type,
                                 local_id=model.pk,
                                 axilent_content_type=axilent_content_type,
                                 axilent_content_key=returned_key)
-                
+            
                     return (True,True)
-                except IntegrityError:
-                    # product of race condition, record created by another thread
-                    return (False,False)
+
         else:
             return (False,False)
     
@@ -165,32 +168,29 @@ class AxilentContentRecordManager(models.Manager):
         created for the first time.
         """
         if content_client:
-            data = self.data_for_library(model)
-            try:
-                record = self.get_record(model)
-                # this content item exists in ACE, try to update
-                response = content_client.update_content(record.axilent_content_type,
-                                                         record.axilent_content_key,
-                                                         **data)
-                return (True,False)
-            except AxilentContentRecord.DoesNotExist:
-                # new content
-                local_content_type = ContentType.objects.get_for_model(model)
-                axilent_content_type = model.Axilent.content_type
-                response = content_client.create_content(axilent_content_type,
-                                                         **data)
-                
-                # create new record
+            with lock:
+                data = self.data_for_library(model)
                 try:
+                    record = self.get_record(model)
+                    # this content item exists in ACE, try to update
+                    response = content_client.update_content(record.axilent_content_type,
+                                                             record.axilent_content_key,
+                                                             **data)
+                    return (True,False)
+                except AxilentContentRecord.DoesNotExist:
+                    # new content
+                    local_content_type = ContentType.objects.get_for_model(model)
+                    axilent_content_type = model.Axilent.content_type
+                    response = content_client.create_content(axilent_content_type,
+                                                             **data)
+                
+                    # create new record
                     self.create(local_content_type=local_content_type,
                                 local_id=model.pk,
                                 axilent_content_type=axilent_content_type,
                                 axilent_content_key=response)
-                
+            
                     return (True,True)
-                except IntegrityError:
-                    # product of a race condition, record created by another thread
-                    return (False,False)
         else:
             return (False,False)
     
