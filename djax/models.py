@@ -131,7 +131,7 @@ class AxilentContentRecordManager(models.Manager):
         
         """
         if library_client:
-            with lock:
+            with self.lock:
                 lib_data = self.data_for_library(model)
                 try:
                     record = self.get_record(model)
@@ -168,7 +168,7 @@ class AxilentContentRecordManager(models.Manager):
         created for the first time.
         """
         if content_client:
-            with lock:
+            with self.lock:
                 data = self.data_for_library(model)
                 try:
                     record = self.get_record(model)
