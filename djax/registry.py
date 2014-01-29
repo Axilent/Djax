@@ -34,13 +34,16 @@ def build_registry():
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
+                log.info('Examining app %s' % app_path)
                 app_module = get_module(app_path)
                 if hasattr(app_module,'models'):
                     module = getattr(app_module,'models')
                     for name, attribute in inspect.getmembers(module):
+                        log.debug('content registry examing module member %s.' % name)
                         if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,AxilentContent):
                             # this is a content model, add to registry
                             try:
+                                log.info('Adding model %s to content registry.' % name)
                                 content_registry[attribute.Axilent.content_type] = attribute
                             except AttributeError:
                                 raise MalformedRegistry('All Axilent content mappings must be defined with an "Axilent" inner class with a "content_type" attribute.')
