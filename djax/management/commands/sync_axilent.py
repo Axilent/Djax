@@ -9,12 +9,24 @@ class Command(BaseCommand):
     """
     The command class.
     """
+    option_list = BaseCommand.option_list + (
+        make_option('--content-type',
+                    dest='content_type',
+                    default=None,
+                    help_text='The Axilent content type to sync.  If not specified then all the Axilent content will by synced.'),
+    )
+    
     def handle(self,**options):
         """
         Handler method.
         """
         print 'Syncing local models with Axilent'
-        result = sync_content()
+        content_type = options.get('content_type',None)
+        result = None
+        if content_type:
+            result = sync_content(content_type_to_sync=content_type)
+        else:
+            result = sync_content()
         if result:
             print 'Content model has been synced with Axilent'
         else:

@@ -166,7 +166,23 @@ class AxilentContent(object):
 # = Content Operations =
 # ======================
 
-def sync_content(token=None):
+def sync_content_type(content_type):
+    """
+    Syncs a specific content type.
+    """
+    content_keys = content_client.content_keys(content_type)
+    for content_key in content_keys:
+        try:
+            record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
+                                                      axilent_content_key=content_key)
+            axilent_content = record.get_update()
+            if axilent_content:
+                log.debug('Syncing local model with updated content %s.' % unicode(axilent_content))
+                record.sync_content(axilent_content)
+        except AxilentContentRecord.DoesNotExist:
+            AxilentContentRecord.objects.create_model(content_type,content_key)
+
+def sync_content(token=None,content_type_to_sync=None):
     """
     Synchronizes the local models with Axilent content.
     """
@@ -182,22 +198,17 @@ def sync_content(token=None):
     
     # ensure content registry loaded
     build_registry()
-
-    for content_type in content_registry.keys():
-        content_keys = content_client.content_keys(content_type)
-        
-        for content_key in content_keys:
-            try:
-                record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
-                                                          axilent_content_key=content_key)
-                
-                axilent_content = record.get_update()
-                if axilent_content:
-                    log.debug('About to sync local model with updated content %s.' % unicode(axilent_content))
-                    record.sync_content(axilent_content)
-            except AxilentContentRecord.DoesNotExist:
-                # the axilent content does not exist locally - create
-                AxilentContentRecord.objects.create_model(content_type,content_key)
+    
+    if content_type_to_sync:
+        log.info('Syncing %s.' % content_type_to_sync)
+        try:
+            content_type = content_registry[content_type_to_sync]
+            sync_content_type(content_type)
+        except KeyError:
+            log.error('%s is not in the content registry.' % content_type_to_sync)
+    else:
+        for content_type in content_registry.keys():
+            sync_content_type(content_type)
     
     lock.delete()
     return True # sync occured
