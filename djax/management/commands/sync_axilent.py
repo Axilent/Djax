@@ -16,7 +16,7 @@ class Command(BaseCommand):
                     help='The Axilent content type to sync.  If not specified then all the Axilent content will by synced.'),
     )
     
-    def handle(self,**options):
+    def handle(self,*args,**options):
         """
         Handler method.
         """
