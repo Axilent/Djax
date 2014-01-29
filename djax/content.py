@@ -203,7 +203,7 @@ def sync_content(token=None,content_type_to_sync=None):
         log.info('Syncing %s.' % content_type_to_sync)
         try:
             content_type = content_registry[content_type_to_sync]
-            sync_content_type(content_type)
+            sync_content_type(content_type_to_sync)
         except KeyError:
             log.error('%s is not in the content registry.' % content_type_to_sync)
     else:
