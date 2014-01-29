@@ -1,7 +1,7 @@
 """
 Content sync for Djax
 """
-from djax.registry import content_registry
+from djax.registry import content_registry, build_registry
 from djax.gateway import content_client, trigger_client
 import uuid
 import logging
@@ -179,6 +179,9 @@ def sync_content(token=None):
         token = uuid.uuid4().hex
     
     lock = ContentSyncLock.objects.create(token=token)
+    
+    # ensure content registry loaded
+    build_registry()
 
     for content_type in content_registry.keys():
         content_keys = content_client.content_keys(content_type)
