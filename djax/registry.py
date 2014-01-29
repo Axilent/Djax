@@ -39,7 +39,7 @@ def build_registry():
                 if hasattr(app_module,'models'):
                     module = getattr(app_module,'models')
                     for name, attribute in inspect.getmembers(module):
-                        log.debug('content registry examing module member %s.' % name)
+                        log.debug('content registry examining module member %s.' % name)
                         if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,AxilentContent):
                             # this is a content model, add to registry
                             try:
