@@ -170,6 +170,8 @@ def sync_content_type(content_type):
     """
     Syncs a specific content type.
     """
+    from djax.models import AxilentContentRecord
+    
     content_keys = content_client.content_keys(content_type)
     for content_key in content_keys:
         try:
@@ -186,7 +188,7 @@ def sync_content(token=None,content_type_to_sync=None):
     """
     Synchronizes the local models with Axilent content.
     """
-    from djax.models import AxilentContentRecord, ContentSyncLock
+    from djax.models import ContentSyncLock
     
     if ContentSyncLock.objects.all().exists():
         return False # already sync locked
