@@ -13,30 +13,22 @@ def check_auth(view):
     """
     def wrapper(request,*args,**kwargs):
         if hasattr(settings,'DJAX_DISABLE_AUTH') and settings.DJAX_DISABLE_AUTH:
-            print 'auth disabled'
             return view(request,*args,**kwargs)
         else:
             if 'HTTP_AUTHORIZATION' in request.META:
-                print 'auth credentials present, checking...'
                 basic_flag, auth_string = request.META['HTTP_AUTHORIZATION'].split()
                 token = base64.b64decode(auth_string)[:-1] # chop trailing colon
                 try:
                     auth_token = AuthToken.objects.get(token=token)
-                    print 'auth token found'
                     if auth_token.origin_domain:
-                        print 'auth token requires origin domain',auth_token.origin_domain
                         origin_domain = request.META.get('REMOTE_HOST',None)
                         if not origin_domain == auth_token.origin_domain:
-                            print 'non-matching origin domain'
                             return HttpResponse('Not Allowed',status=403)
                 
-                    print 'auth token is good, running target view'
                     return view(request,*args,**kwargs)
                 except AuthToken.DoesNotExist:
-                    print 'cannot find auth token'
                     pass
         
-            print 'request is not authorized'
             return HttpResponse('Not Allowed',status=403)
     
     return wrapper
