@@ -166,6 +166,24 @@ class AxilentContent(object):
 # = Content Operations =
 # ======================
 
+def sync_record(content_type,content_key):
+    """
+    Syncs a single content record.
+    """
+    from djax.models import AxilentContentRecord
+    record = None
+    try:
+        record = AxilentContentRecord.objects.get(axilent_content_type=content_type,
+                                                  axilent_content_key=content_key)
+        axilent_content = record.get_update()
+        if axilent_content:
+            log.info('Syncing local model %s:%s with updated content from ACE.' % (record.axilent_content_type,record.axilent_content_key))
+            record.sync_content(axilent_content)
+            return False # no new record created
+    except AxilentContentRecord.DoesNotExist:
+        AxilentContentRecord.objects.create_model(content_type,content_key)
+        return True # new record created
+
 def sync_content_type(content_type):
     """
     Syncs a specific content type.
@@ -179,7 +197,7 @@ def sync_content_type(content_type):
                                                       axilent_content_key=content_key)
             axilent_content = record.get_update()
             if axilent_content:
-                log.debug('Syncing local model with updated content %s.' % unicode(axilent_content))
+                log.debug('Syncing local model %s:%s with updated content from ACE' % (record.axilent_content_type,record_axilent_content_key))
                 record.sync_content(axilent_content)
         except AxilentContentRecord.DoesNotExist:
             AxilentContentRecord.objects.create_model(content_type,content_key)

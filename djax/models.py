@@ -10,6 +10,7 @@ from djax.gateway import content_client, library_client, library_project, trigge
 from djax.registry import content_registry, build_registry
 import re
 import threading
+import uuid
 
 log = logging.getLogger('djax')
 
@@ -367,6 +368,30 @@ class ProfileRecord(models.Model):
     
     def __unicode__(self):
         return self.profile
+
+class AuthTokenManager(models.Manager):
+    """
+    Manager class for AuthToken.
+    """
+    def new_token(origin_domain=None):
+        """
+        Creates a new token.
+        """
+        return self.create(origin_domain=origin_domain,
+                           token=uuid.uuid4().hex)
+
+class AuthToken(models.Model):
+    """
+    Token for remote management of Djax install.
+    """
+    origin_domain = models.URLField(null=True)
+    token = models.CharField(max_length=100,unique=True)
+    
+    objects = AuthTokenManager()
+    
+    def __unicode__(self):
+        return self.token
+
 
 # =================
 # = Registry Hook =
