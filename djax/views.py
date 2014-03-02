@@ -34,6 +34,7 @@ def phone_home(request,token=None):
     """
     sync_content(token)
 
+@check_auth
 def sync_record(request):
     """
     Syncs a single record.
@@ -45,3 +46,5 @@ def sync_record(request):
             return HttpResponse('Created %s:%s' % (content_type,content_key),status_code=201)
         else:
             return HttpResponse('Updated %s:%s' % (content_type,content_key))
+    else:
+        return HttpResponse('Badly formed request, specify content_type and content_key in request params.',status_code=409)
