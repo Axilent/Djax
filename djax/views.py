@@ -26,7 +26,9 @@ def check_auth(view):
                             return HttpResponse('Not Allowed',status_code=403)
                     return view(request,*args,**kwargs)
                 except AuthToken.DoesNotExist:
-                    return HttpResponse('Not Allowed',status_code=403) 
+                    return HttpResponse('Not Allowed',status_code=403)
+    
+    return wrapper
 
 def phone_home(request,token=None):
     """
