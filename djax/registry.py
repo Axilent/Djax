@@ -34,7 +34,7 @@ def build_registry():
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
-                log.info('Examining app %s' % app_path)
+                #log.debug('Examining app %s' % app_path)
                 app_module = get_module(app_path)
                 if hasattr(app_module,'models'):
                     module = getattr(app_module,'models')
