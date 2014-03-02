@@ -373,7 +373,7 @@ class AuthTokenManager(models.Manager):
     """
     Manager class for AuthToken.
     """
-    def new_token(origin_domain=None):
+    def new_token(self,origin_domain=None):
         """
         Creates a new token.
         """
