@@ -47,9 +47,12 @@ def sync_record_view(request):
     content_type = request.GET.get('content_type',None)
     content_key = request.GET.get('content_key',None)
     if content_type and content_key:
-        if sync_record(content_type,content_key):
-            return HttpResponse('Created %s:%s' % (content_type,content_key),status=201)
-        else:
-            return HttpResponse('Updated %s:%s' % (content_type,content_key))
+        try:
+            if sync_record(content_type,content_key):
+                return HttpResponse('Created %s:%s' % (content_type,content_key),status=201)
+            else:
+                return HttpResponse('Updated %s:%s' % (content_type,content_key))
+        except ValueError as ve:
+            return HttpResponse(unicode(ve),status=409) # probably a mismatch of content types
     else:
         return HttpResponse('Badly formed request, specify content_type and content_key in request params.',status=409)

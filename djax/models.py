@@ -57,29 +57,32 @@ class AxilentContentRecordManager(models.Manager):
         Creates a new model and accompaning content record for the axilent content.
         """
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
-        model_class = content_registry[axilent_content_type]
-        
-        field_map = {}
         try:
-            field_map = model_class.Axilent.field_map
-        except AttributeError:
-            for key in content_data.data.keys():
-                field_map[key] = key
+            model_class = content_registry[axilent_content_type]
         
-        fields = {}
-        for axilent_field,model_field in field_map.items():
+            field_map = {}
             try:
-                fields[model_field] = content_data.data[axilent_field]
-            except KeyError:
-                pass
+                field_map = model_class.Axilent.field_map
+            except AttributeError:
+                for key in content_data.data.keys():
+                    field_map[key] = key
         
-        local_model = model_class.objects.create(**fields) # create the local model with the content data
-        local_content_type = ContentType.objects.get_for_model(local_model)
-        record = self.create(local_content_type=local_content_type,
-                             local_id=local_model.pk,
-                             axilent_content_type=axilent_content_type,
-                             axilent_content_key=axilent_content_key,
-                             updated=datetime.now())
+            fields = {}
+            for axilent_field,model_field in field_map.items():
+                try:
+                    fields[model_field] = content_data.data[axilent_field]
+                except KeyError:
+                    pass
+        
+            local_model = model_class.objects.create(**fields) # create the local model with the content data
+            local_content_type = ContentType.objects.get_for_model(local_model)
+            record = self.create(local_content_type=local_content_type,
+                                 local_id=local_model.pk,
+                                 axilent_content_type=axilent_content_type,
+                                 axilent_content_key=axilent_content_key,
+                                 updated=datetime.now())
+        except KeyError:
+            raise ValueError('ACE content type %s cannot be found in the local registry.' % axilent_content_type)
         
         return (local_model,record)
     
