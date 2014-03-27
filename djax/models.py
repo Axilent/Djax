@@ -14,6 +14,37 @@ import uuid
 
 log = logging.getLogger('djax')
 
+class DefaultFieldConverter(object):
+    def __init__(self,local_field):
+        self.field = local_field
+    
+    def to_local_model(self,ace_content,ace_field_value):
+        """
+        Associated content link, if found, otherwise just assigns value.
+        """
+        if re.match(r'^[\w\s]+:[A-Fa-f0-9]+$',ace_field_value):
+            ctype, ckey = ace_field_value.split(':')
+            record = ContentRecord.objects.get(axilent_content_type=ctype,axilent_content_key=ckey)
+            log.debug('Converted content link %s to local model.' % ace_field_value)
+            return record.get_local_model()
+        else:
+            return ace_field_value
+    
+    def to_ace(self,local_model):
+        """
+        Returns the content link string from the model.
+        """
+        value = getattr(local_model,self.field)
+        if isinstance(value,models.Model):
+            try:
+                record = ContentRecord.objects.get_record(value)
+                log.debug('Converted local model to content link %s:%s.' % (record.axilent_content_type,record.axilent_content_key))
+                return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
+            except AxilentContentRecord.DoesNotExist:
+                return ''
+        else:
+            return value
+
 class AxilentContentRecordManager(models.Manager):
     """
     Manager class for AxilentContentRecord.
@@ -248,15 +279,41 @@ class AxilentContentRecord(models.Model):
         log.debug('syncing local model with Axilent content %s, using field map %s.' % (unicode(axilent_content),unicode(field_map)))
         
         # Iterate through the field map and set the local model values from the incoming Axilent content
+        deferred_field_converters = []
         for axilent_field, model_field in field_map.items():
-            try:
-                value = getattr(axilent_content,axilent_field)
-                setattr(local_model,model_field,self.__class__.objects.content_link_to_model(value))
-                log.debug('settings local model attribute %s with value %s.' % (model_field,value))
+            try:            
+                if hasattr(model_field,'field'):
+                    # this is a field converter
+                    # sanity check
+                    if not hasattr(model_field,'to_ace') or not hasattr(model_field,'to_local_model'):
+                        raise ValueError('You must define the methods to_ace and to_local_model for field converter for ace field %s.' % axilent_field)
+                
+                    if hasattr(model_field,'deferred') and model_field.deferred:
+                        deferred_field_converters.append((axilent_field,model_field))
+                    else:
+                        value = model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field))
+                        setattr(local_model,model_field.field,value)
+                else:
+                    # not a field converter, just a string.  Use DefaultFieldConverter
+                    default_field_converter = DefaultFieldConverter(model_field)
+                    setattr(local_model,model_field,default_field_converter.to_local_model(axilent_content,getattr(axilent_content,axilent_field)))
             except AttributeError:
                 log.exception('Local model has no field %s (matched to Axilent field %s).' % (model_field,axilent_field))
         
         local_model.save()
+        
+        if deferred_field_converters:
+            for deferred_axilent_field, deferred_model_field in deferred_field_converters:
+                try:
+                    deferred_model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field),local_model)
+                except AttributeError:
+                    log.exception('Local model has no field %s (matched to Axilent field %s).' % (deferred_model_field.field,deferred_axilent_field))
+            
+            local_model.save()
+        else:
+            log.info('No deferred field converters for %s.' % unicode(local_model))
+            
+            
         self.updated = datetime.now()
         self.save()
         
