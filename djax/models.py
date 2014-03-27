@@ -348,7 +348,7 @@ class AxilentContentRecord(models.Model):
         if deferred_field_converters:
             for deferred_axilent_field, deferred_model_field in deferred_field_converters:
                 try:
-                    deferred_model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field),local_model)
+                    deferred_model_field.to_local_model(axilent_content,getattr(axilent_content,deferred_axilent_field),local_model)
                 except AttributeError:
                     log.exception('Local model has no field %s (matched to Axilent field %s).' % (deferred_model_field.field,deferred_axilent_field))
             
