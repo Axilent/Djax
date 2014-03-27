@@ -88,6 +88,7 @@ class AxilentContentRecordManager(models.Manager):
         Creates a new model and accompaning content record for the axilent content.
         """
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
+        local_model, record = None, None
         try:
             model_class = content_registry[axilent_content_type]
         
@@ -97,15 +98,43 @@ class AxilentContentRecordManager(models.Manager):
             except AttributeError:
                 for key in content_data.data.keys():
                     field_map[key] = key
-        
+            
+            # Iterate through the field map and set the local model values from the incoming Axilent content
             fields = {}
-            for axilent_field,model_field in field_map.items():
-                try:
-                    fields[model_field] = content_data.data[axilent_field]
-                except KeyError:
-                    pass
-        
+            deferred_field_converters = []
+            for axilent_field, model_field in field_map.items():
+                try:            
+                    if hasattr(model_field,'field'):
+                        # this is a field converter
+                        # sanity check
+                        if not hasattr(model_field,'to_ace') or not hasattr(model_field,'to_local_model'):
+                            raise ValueError('You must define the methods to_ace and to_local_model for field converter for ace field %s.' % axilent_field)
+                
+                        if hasattr(model_field,'deferred') and model_field.deferred:
+                            deferred_field_converters.append((axilent_field,model_field))
+                        else:
+                            value = model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field))
+                            fields[model_field.field] = value
+                    else:
+                        # not a field converter, just a string.  Use DefaultFieldConverter
+                        default_field_converter = DefaultFieldConverter(model_field)
+                        fields[model_field] = default_field_converter.to_local_model(axilent_content,getattr(axilent_content,axilent_field))
+                except AttributeError:
+                    log.exception('Local model has no field %s (matched to Axilent field %s).' % (model_field,axilent_field))
+            
             local_model = model_class.objects.create(**fields) # create the local model with the content data
+            
+            if deferred_field_converters:
+                for deferred_axilent_field, deferred_model_field in deferred_field_converters:
+                    try:
+                        deferred_model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field),local_model)
+                    except AttributeError:
+                        log.exception('Local model has no field %s (matched to Axilent field %s).' % (deferred_model_field.field,deferred_axilent_field))
+            
+                local_model.save()
+            else:
+                log.info('No deferred field converters for %s.' % unicode(local_model))
+
             local_content_type = ContentType.objects.get_for_model(local_model)
             record = self.create(local_content_type=local_content_type,
                                  local_id=local_model.pk,
