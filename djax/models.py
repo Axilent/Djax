@@ -88,6 +88,7 @@ class AxilentContentRecordManager(models.Manager):
         Creates a new model and accompaning content record for the axilent content.
         """
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
+        print 'incoming content data is',content_data
         local_model, record = None, None
         try:
             model_class = content_registry[axilent_content_type]
