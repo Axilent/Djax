@@ -84,7 +84,6 @@ class CalendarClient(object):
         """
         Creates a new event.
         """
-        print 'about to post event with content:',content
         response = self.event_resource.post(data={'calendar':calendar,
                                                     'event_type':event_type,
                                                     'start':start.strftime('%Y-%m-%d %H:%M:%S'),
