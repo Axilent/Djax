@@ -104,7 +104,7 @@ class AxilentContentRecordManager(models.Manager):
             fields = {}
             deferred_field_converters = []
             for axilent_field, model_field in field_map.items():
-                print 'settings ace field',axilent_field,'with value',content_data[axilent_field]
+                print 'settings ace field',axilent_field,'with value',getattr(content_data,axilent_field)
                 try:            
                     if hasattr(model_field,'field'):
                         # this is a field converter
