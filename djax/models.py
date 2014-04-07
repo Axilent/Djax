@@ -24,9 +24,9 @@ class DefaultFieldConverter(object):
         """
         if re.match(r'^[\w\s]+:[A-Fa-f0-9]+$',ace_field_value):
             ctype, ckey = ace_field_value.split(':')
-            record = ContentRecord.objects.get(axilent_content_type=ctype,axilent_content_key=ckey)
+            local_model = AxilentContentRecord.objects.get_or_create_model(axilent_content_type=ctype,axilent_content_key=ckey)
             log.debug('Converted content link %s to local model.' % ace_field_value)
-            return record.get_local_model()
+            return local_model
         else:
             return ace_field_value
     
@@ -37,7 +37,7 @@ class DefaultFieldConverter(object):
         value = getattr(local_model,self.field)
         if isinstance(value,models.Model):
             try:
-                record = ContentRecord.objects.get_record(value)
+                record = AxilentContentRecord.objects.get_record(value)
                 log.debug('Converted local model to content link %s:%s.' % (record.axilent_content_type,record.axilent_content_key))
                 return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
             except AxilentContentRecord.DoesNotExist:
@@ -148,6 +148,20 @@ class AxilentContentRecordManager(models.Manager):
             raise ValueError('ACE content type %s cannot be found in the local registry.' % axilent_content_type)
         
         return (local_model,record)
+    
+    def get_or_create_model(self,axilent_content_type,axilent_content_key):
+        """
+        Gets the locally cached model, corresponding to the AxilentContentRecord, or,
+        if there is no record, creates a new model and record from remote content
+        data in ACE.
+        """
+        try:
+            record = self.get(axilent_content_type=axilent_content_type,
+                              axilent_content_key=axilent_content_key)
+            return record.get_local_model()
+        except AxilentContentRecord.DoesNotExist:
+            local_model, record = self.create_model(axilent_content_type,axilent_content_key)
+            return local_model
     
     def model_to_content_link(self,value):
         """
