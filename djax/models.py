@@ -125,6 +125,7 @@ class AxilentContentRecordManager(models.Manager):
                 else:
                     log.info('Skipping ace field %s - not in data from ace.' % axilent_field)
             
+            log.debug('Creating local model with field data %s.' % unicode(fields))
             local_model = model_class.objects.create(**fields) # create the local model with the content data
             
             if deferred_field_converters:

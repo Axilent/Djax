@@ -200,6 +200,7 @@ def sync_content_type(content_type):
                 log.debug('Syncing local model %s:%s with updated content from ACE' % (record.axilent_content_type,record.axilent_content_key))
                 record.sync_content(axilent_content)
         except AxilentContentRecord.DoesNotExist:
+            log.debug('Creating new local model from ACE content %s:%s' % (record.axilent_content_type,record.axilent_content_key))
             AxilentContentRecord.objects.create_model(content_type,content_key)
 
 def sync_content(token=None,content_type_to_sync=None):
