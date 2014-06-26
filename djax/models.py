@@ -45,6 +45,49 @@ class DefaultFieldConverter(object):
         else:
             return value
 
+class NullableForeignKeyConverter(object):
+    """
+    Special converter to convert content links to local foreign keys. The default
+    converter would normally handle this, but not in the case where there is the
+    possibility of a nullable foreign key.  If the model has a nullable foreign
+    key, this converter should be specified instead.
+    """
+    def __init__(self,local_field):
+        self.field = local_field
+    
+    def to_local_model(self,ace_content,ace_field_value):
+        """
+        Associated content link or None.
+        """
+        if ace_field_value:
+            if re.match(r'^[\w\s]+:[A-Fa-f0-9]+$',ace_field_value):
+                ctype, ckey = ace_field_value.split(':')
+                local_model = AxilentContentRecord.objects.get_or_create_model(axilent_content_type=ctype,axilent_content_key=ckey)
+                log.debug('Converted content link %s to local model.' % ace_field_value)
+                return local_model
+            else:
+                raise ValueError('Cannot use the NullableForeignKeyConverter to set non-null values that are not foreign keys. Value %s for field %s.' % (ace_field_value,self.field))
+        else:
+            return None
+    
+    def to_ace(self,local_model):
+        """
+        Returns a content link string, or ''.
+        """
+        value = getattr(local_model,self.field)
+        if value:
+            if isinstance(value,models.Model):
+                try:
+                    record = AxilentContentRecord.objects.get_record(value)
+                    log.debug('Converted local model to content link %s:%s.' % (record.axilent_content_type,record.axilent_content_key))
+                    return '%s:%s' % (record.axilent_content_type,record.axilent_content_key)
+                except AxilentContentRecord.DoesNotExist:
+                    return ''
+            else:
+                raise ValueError('Cannot use the NullableForeignKeyConverter to set non-null values that are not content links. Value %s for field %s.' & (unicode(value),self.field))
+        else:
+            return ''
+
 class AxilentContentRecordManager(models.Manager):
     """
     Manager class for AxilentContentRecord.
