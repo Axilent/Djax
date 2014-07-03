@@ -101,6 +101,7 @@ class M2MFieldConverter(object):
         """
         Converts to local model relations.
         """
+        log.debug('Converting ace value %s to local model relations.' % ace_field_value)
         added_models = []
         for compound_key in ace_field_value:
             ctype, ckey = compound_key.split(':')
