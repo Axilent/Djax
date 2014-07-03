@@ -88,6 +88,49 @@ class NullableForeignKeyConverter(object):
         else:
             return ''
 
+class M2MFieldConverter(object):
+    """
+    Field converter that translates m-2-m model relations, from ACE content link lists.
+    """
+    deferred = True
+    
+    def __init__(self,local_field):
+        self.field = local_field
+    
+    def to_local_model(self,ace_content,ace_field_value,local_model):
+        """
+        Converts to local model relations.
+        """
+        added_models = []
+        for compound_key in ace_field_value:
+            ctype, ckey = compound_key.split(':')
+            linked_model = AxilentContentRecord.objects.get_or_create_model(axilent_content_type=ctype,
+                                                                           axilent_content_key=ckey)
+            getattr(local_model,self.field).add(linked_model)
+            added_models.append(linked_model.pk)
+            log.debug('Building local model relation from content link %s.' % compound_key)
+        
+        # get rid of any relations not specified in the content link list
+        for stale_link in getattr(local_model,self.field).exclude(pk__in=added_models):
+            getattr(local_model,self.field).remove(stale_link)
+            log.debug('Removing stale link %s from local model.' % unicode(stale_link))
+        
+        local_model.save()
+    
+    def to_ace(self,local_model):
+        """
+        Converts local relations to content key list.
+        """
+        key_list = []
+        for linked_model in getattr(local_model,self.field).all():
+            try:
+                record = AxilentContentRecord.objects.get_record(linked_model)
+                key_list.append('%s:%s' % (record.axilent_content_type,record.axilent_content_key))
+            except AxilentContentRecord.DoesNotExist:
+                log.warning('Cannot assign local model %s to ACE content link list.  Local model does not exist in ACE.' % unicode(linked_model))
+        
+        return key_list
+
 class AxilentContentRecordManager(models.Manager):
     """
     Manager class for AxilentContentRecord.
