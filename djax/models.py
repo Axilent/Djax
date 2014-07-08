@@ -193,17 +193,21 @@ class AxilentContentRecordManager(models.Manager):
                 if hasattr(content_data,axilent_field):
                     try:            
                         if hasattr(model_field,'field'):
+                            log.debug('%s using field converter %s.' % (axilent_field,unicode(model_field)))
                             # this is a field converter
                             # sanity check
                             if not hasattr(model_field,'to_ace') or not hasattr(model_field,'to_local_model'):
                                 raise ValueError('You must define the methods to_ace and to_local_model for field converter for ace field %s.' % axilent_field)
                 
                             if hasattr(model_field,'deferred') and model_field.deferred:
+                                log.debug('%s uses a deferred field converter.' % axilent_field)
                                 deferred_field_converters.append((axilent_field,model_field))
                             else:
+                                log.debug('%s uses an immediate field converter.' % axilent_field)
                                 value = model_field.to_local_model(content_data,getattr(content_data,axilent_field))
                                 fields[model_field.field] = value
                         else:
+                            log.debug('Using default field converter for %s.' % axilent_field)
                             # not a field converter, just a string.  Use DefaultFieldConverter
                             default_field_converter = DefaultFieldConverter(model_field)
                             fields[model_field] = default_field_converter.to_local_model(content_data,getattr(content_data,axilent_field))
