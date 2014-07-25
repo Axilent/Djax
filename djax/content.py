@@ -8,6 +8,7 @@ import logging
 from django.db.models import Manager
 from django.contrib.contenttypes.models import ContentType
 from pax.util import slugify
+import re
 
 log = logging.getLogger('djax')
 
