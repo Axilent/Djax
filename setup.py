@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 try:
-    from setuptools import setup 
+    from setuptools import setup, find_packages
 except ImportError, err:
-    from distutils.core import setup
+    from distutils.core import setup, find_packages
     
 from djax import VERSION
 
@@ -10,7 +10,7 @@ setup(
     name='Djax',
     version='.'.join(map(str,VERSION)),
     description='Integrates Django projects with Axilent.',
-    packages=['djax','djax.management.commands','pax'],
+    packages=find_packages(exclude=['example']),
     license='BSD',
     author='Loren Davie',
     author_email='code@axilent.com',
