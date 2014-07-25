@@ -10,7 +10,7 @@ setup(
     name='Djax',
     version='.'.join(map(str,VERSION)),
     description='Integrates Django projects with Axilent.',
-    packages=['djax','pax'],
+    packages=['djax','djax.management.commands','pax'],
     license='BSD',
     author='Loren Davie',
     author_email='code@axilent.com',
