@@ -1,11 +1,128 @@
 Djax
 ====
 
-Replacement for Django-Axilent.  Djax integrates Axilent with Django projects.
+**Django / ACE Integration**
 
+Djax integrates the Django web framework with [Axilent ACE](http://www.axilent.com/products/ace/). ACE is a sophisticated content targeting system that can be used for product recommendations, related content, personalization and contextual advertising.
 
-Model Field Conversions
----
+Djax links Django models with ACE content types, enabling the use of ACE as a CMS for a Django website.  It also provides easy integration with ACE's targeting Content Channels, and provides integration with ACE's user profiling system.
+
+###Integrating ACE Published Content With Django
+
+In order to use content that is authored our sourced in ACE in a Django website, integrate the desired Django model with Djax using the ACEContent mixin.
+
+    # your-app/models.py
+    
+	from django.db import models
+	from djax.content import ACEContent
+	
+	class Article(models.Model,ACEContent):
+		 title = models.CharField(max_length=100)
+		 body = models.TextField()
+		 
+		 class ACE:
+		     content_type = 'Article'
+		     field_map = {
+		         'title':'title',
+		         'body':'body',
+		     }
+
+Several important things are happening here:
+
+1. In addition to inheriting from `models.Model` like an ordinary Django model, the Article class also inherits from `ACEContent`.  This will allow Djax to identify it as a local type of content that should be bound to an ACE Content Type.
+2. In the `ACE` inner class, the `content_type` attribute identifies the ACE Content Type with which this model should be associated.
+3. In the `ACE inner class` the `field_map` dictionary defines the mappings between the ACE Content Type fields (the keys in the dictionary) and the local model's fields (the values in the dictionary).
+
+When Djax syncs with ACE, it will create or update this model with the mapped content from ACE.
+
+### Managing Foreign Key Relations
+
+ACE is not a relational database, and accordingly does not hold content to the same level of integral rigor as an RDBMS.  However, it does provide some means to directly link one content item to another using a field type called a **Content Link**.
+
+Djax provides a way to convert an ACE Content Link into a Django foreign key relationship.  Let's say you have a local model that has an Author model and an Article model.  The Article model has a foriegn key field that points to the Author model.  In ACE, the Article Content Type would have a Content Link field that would be used to point at an author.
+
+The integration can be implemented without any special work using Djax:
+
+	class Author(models.Model,ACEContent):
+	    first_name = models.CharField(max_length=100)
+	    last_name = models.CharField(max_length=100)
+	    
+	    class ACE:
+	        content_type = 'Author'
+	        field_map = {
+	            'first_name':'first_name',
+	            'last_name':'last_name',
+	        }
+	  
+	  class Article(models.Model,ACEContent):
+	      author = models.ForeignKey(model=Author,related_name='articles')
+	      title = models.CharField(max_length=100)
+		  body = models.TextField()
+		 
+		  class ACE:
+		     content_type = 'Article'
+		     field_map = {
+		         'author','author',
+		         'title':'title',
+		         'body':'body',
+		     }
+
+During a sync, incoming Content Link data from ACE will be enough to alert Djax to look for a local model-to-ACE Content Type mapping, and create a foreign key association in the local models.
+
+Because the local model Article does not allow Article objects to exist in the database without an associated Author, it is important to ensure that the Author object is sync'd to the local database first.  In a bulk sync this will be taken care of automatically, but when syncing once content item at a time, an error will occur if the Article object is sync'd before the associated Author object.
+
+#### Nullable Foreign Key Relations
+
+What if a foreign key relationship is nullable?  In the example given above, what if not all Articles have Authors?  It's not a problem in ACE, just leave the appropriate Content Link field empty.  But an additional step is required with Djax integration:
+
+	  class Article(models.Model,ACEContent):
+	      author = models.ForeignKey(model=Author,null=True,related_name='articles')
+	      title = models.CharField(max_length=100)
+		  body = models.TextField()
+		 
+		  class ACE:
+		     content_type = 'Article'
+		     field_map = {
+		         'author',NullableForeignKeyConverter('author'),
+		         'title':'title',
+		         'body':'body',
+		     }
+
+There are two changes in the Article model.  First the author field has been marked `null=True` to indicate to Django that the Article model may not have an Author.
+
+Secondly, the simple string ('author') indicating that the author field in the incoming content from ACE should be mapped to the local author field has been replaced by a `NullableForeignKeyConverter` object.  This is an indication to Djax that it should apply a special process to the incoming data: either find a local model that corresponds to the supplied Content Link data, or leave the field null.
+
+### Managing Many-to-Many Relations
+
+ACE can also handle many-to-many relations using the Content Link List field type.  Let's say we have a local model that defines a many-to-many relation between Publication and Author objects.  In ACE, the Author object would have a publication field that was a Content Link List that would be used to associate it with Publications.
+
+To implement the integration in Djax we would do this:
+
+	class Publication(models.Model,ACEContent):
+	    name = models.CharField(max_length=100)
+	    
+	    class ACE:
+	        content_type = 'Publication'
+	        field_map = {
+	            'name':'name',
+	        }
+	
+	class Author(models.Model,ACEContent):
+	    first_name = models.CharField(max_length=100)
+	    last_name = models.CharField(max_length=100)
+	    publications = models.ManyToManyField(Publication,related_name='authors')
+	    
+	    class ACE:
+	        content_type = 'Author'
+	        field_map = {
+	            'first_name':'first_name',
+	            'last_name':'last_name',
+	            'publications':M2MFieldConverter('publications'),
+	        }
+
+In the Author model's `ACE` inner class, we have specified the `M2MFieldConverter` for the publications field.  This lets Djax know to convert incoming Content Link List data into a local many-to-many relation.
+
+### Implementing Your Own Field Converters
 
 The default behavior of a field map is to simply take the value from the incoming ACE content and assign that value to the recipient local model. This behavior can be overridden with the use of a *FieldConverter*.
 
@@ -51,5 +168,68 @@ Parent / Child Deferred Example:
 		def to_ace(self,local_model):
 		    """Returns a list of band names for ace."""
 			return [band.name for band in local_model.bands.all()]
-		   
-		  
+
+### ACEContent Methods
+
+A Django model that also inherits from ACEContent will have several additional methods that allow it to be programmatically managed from a Django app, if desired.
+
+#### ACEContent.get_axilent_content_key
+
+Returns the local model's ACE content key.  If the content does not exist within the ACE account, it will return None.  The content key is a GUID rendered in hex format.
+
+#### ACEContent.get_axilent_content_type
+
+Returns the name of the ACE Content Type for the model.
+
+#### ACEContent.sync_with_axilent
+
+Forces the local model to update from content from ACE.  If there is no corresponding content item in the ACE account, this method will do nothing.
+
+#### ACEContent.to_content_dict
+
+Returns content values as a dictionary according to the `field_map`.
+
+#### ACEContent.push_to_library
+
+Pushes the local values of the content into the associated ACE library.  This method returns a 2-tuple of booleans, indicating 1. if the library was updated and 2. if a new content item was created in the library.
+
+#### ACEContent.push_to_graphstack
+
+Puhes the local values of the content directly into the associated GraphStack.  A GraphStack in ACE is a logical container for deployed or published content.
+
+#### ACEContent.archive
+
+Removes the content from any GraphStack where it has been deployed.
+
+#### ACEContent.live_delete
+
+Removes the associated ACE content item from the active GraphStack where it is deployed.
+
+#### ACEContent.tag
+
+Tags the content item within the associated ACE library.
+
+#### ACEContent.detag
+
+De-tags the content item within the associated ACE library.
+
+#### ACEContent.live_tag
+
+Tags the content item where it has been deployed in the associated GraphStack.
+
+#### ACEContent.live_detag
+
+De-tags the content item where it has been deployed in the associated GraphStack.
+
+#### ACEContent.reindex_search
+
+Forces search re-indexing of the deployed associated content.
+
+#### ACEContent.trigger_affinity
+
+Sends an affinity trigger for this content to ACE.
+
+#### ACEContent.trigger_ban
+
+Sends a ban trigger for this content to ACE.
+
