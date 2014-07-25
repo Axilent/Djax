@@ -56,6 +56,8 @@ class AxilentContentRecordManager(models.Manager):
         """
         Creates a new model and accompaning content record for the axilent content.
         """
+        from axilent.content import DefaultFieldConverter
+        
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
         local_model, record = None, None
         try:
