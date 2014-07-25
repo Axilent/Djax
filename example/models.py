@@ -2,9 +2,9 @@
 Example usage of Djax.
 """
 from django.db import models
-from djax import AxilentContent
+from djax.content import ACEContent
 
-class Article(models.Model,AxilentContent):
+class Article(models.Model,ACEContent):
     """
     A local article that syncs to an Axilent content type.
     """

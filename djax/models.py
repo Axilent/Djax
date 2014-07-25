@@ -37,12 +37,12 @@ class AxilentContentRecordManager(models.Manager):
         excludes = []
         
         # collect mappings
-        if hasattr(model,'Axilent'):
-            if hasattr(model.Axilent,'field_map'):
-                field_map = model.Axilent.field_map
+        if hasattr(model,'ACE'):
+            if hasattr(model.ACE,'field_map'):
+                field_map = model.ACE.field_map
             
-            if hasattr(model.Axilent,'exclude'):
-                excludes = model.Axilent.exclude
+            if hasattr(model.ACE,'exclude'):
+                excludes = model.ACE.exclude
         
         # Default the field map to the axilent fields
         if not field_map:
@@ -63,7 +63,7 @@ class AxilentContentRecordManager(models.Manager):
         
             field_map = {}
             try:
-                field_map = model_class.Axilent.field_map
+                field_map = model_class.ACE.field_map
             except AttributeError:
                 for key in content_data.data.keys():
                     field_map[key] = key
@@ -199,7 +199,7 @@ class AxilentContentRecordManager(models.Manager):
                 except AxilentContentRecord.DoesNotExist:
                     # this is new
                     local_content_type = ContentType.objects.get_for_model(model)
-                    axilent_content_type = model.Axilent.content_type
+                    axilent_content_type = model.ACE.content_type
                     response = library_client.create_content(axilent_content_type,
                                                              library_project,
                                                              **lib_data)
@@ -235,7 +235,7 @@ class AxilentContentRecordManager(models.Manager):
                 except AxilentContentRecord.DoesNotExist:
                     # new content
                     local_content_type = ContentType.objects.get_for_model(model)
-                    axilent_content_type = model.Axilent.content_type
+                    axilent_content_type = model.ACE.content_type
                     response = content_client.create_content(axilent_content_type,
                                                              **data)
                 
@@ -253,7 +253,7 @@ class AxilentContentRecordManager(models.Manager):
         """
         Searches ACE and provides model instances that match the search results.
         """
-        content_type = model_class.Axilent.content_type
+        content_type = model_class.ACE.content_type
         search_results = content_client.search(query,content_type)
         content_records = self.filter(axilent_content_type=content_type,axilent_content_key__in=[result.key for result in search_results])
         return model_class.objects.filter(pk__in=[record.local_id for record in content_records])
@@ -294,7 +294,7 @@ class AxilentContentRecord(models.Model):
         Syncs the local content to the incoming axilent content (a dictionary).
         """
         local_model = self.get_local_model()
-        field_map = local_model.Axilent.field_map
+        field_map = local_model.ACE.field_map
         
         log.debug('syncing local model with Axilent content %s, using field map %s.' % (unicode(axilent_content),unicode(field_map)))
         

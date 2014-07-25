@@ -11,7 +11,7 @@ from pax.util import slugify
 
 log = logging.getLogger('djax')
 
-class AxilentContent(object):
+class ACEContent(object):
     """
     Mixin to provide Axilent content sync services for Django models.
     """
@@ -54,7 +54,7 @@ class AxilentContent(object):
         """
         try:
             content_dict = {}
-            for axilent_field, local_field in self.Axilent.field_map.items():
+            for axilent_field, local_field in self.ACE.field_map.items():
                 try:
                     content_dict[axilent_field] = getattr(self,local_field)
                 except AttributeError:
@@ -62,7 +62,7 @@ class AxilentContent(object):
             
             return content_dict
         except AttributeError:
-            raise ValueError('You must define an Axilent field map to create a content dict from a local model.')
+            raise ValueError('You must define an ACE field map to create a content dict from a local model.')
     
     def push_to_library(self):
         """
@@ -145,7 +145,7 @@ class AxilentContent(object):
         Sends affinity trigger for this content.
         """
         trigger_client.trigger('affinity',
-                               slugify(self.Axilent.content_type),
+                               slugify(self.ACE.content_type),
                                profile=profile,
                                variables={'key':self.get_axilent_content_key()},
                                environment=environment,
@@ -156,7 +156,7 @@ class AxilentContent(object):
         Sends a ban trigger for this content.
         """
         trigger_client.trigger('ban',
-                               slugify(self.Axilent.content_type),
+                               slugify(self.ACE.content_type),
                                profile=profile,
                                variables={'key':self.get_axilent_content_key()},
                                environment=environment,
@@ -404,7 +404,7 @@ class ContentChannel(object):
         
         channel_slug = slugify(channel or self.channel)
         
-        axl_content_type = queryset.model.Axilent.content_type
+        axl_content_type = queryset.model.ACE.content_type
         
         results = self.api.channel(channel_slug,**params)
         

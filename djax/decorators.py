@@ -2,7 +2,7 @@
 Decorators for Djax.  To be applied to views.
 """
 from djax.models import ProfileRecord
-from djax.content import AxilentContent
+from djax.content import ACEContent
 
 def affinity_trigger(model_class,id_name):
     """
@@ -16,8 +16,8 @@ def affinity_trigger(model_class,id_name):
             profile = ProfileRecord.objects.for_user(request.user)
             
             # sanity check
-            if not isinstance(model,AxilentContent):
-                raise ValueError('Model %s is not Axilent Content.' % unicode(model))
+            if not isinstance(model,ACEContent):
+                raise ValueError('Model %s is not ACE Content.' % unicode(model))
             
             model.trigger_affinity(profile)
             
@@ -38,8 +38,8 @@ def ban_trigger(model_class,id_name):
             profile = ProfileRecord.objects.for_user(request.user)
             
             # sanity check
-            if not isinstance(model,AxilentContent):
-                raise ValueError('Model %s is not Axilent Content.' % unicode(model))
+            if not isinstance(model,ACEContent):
+                raise ValueError('Model %s is not ACE Content.' % unicode(model))
             
             model.trigger_ban(profile)
             

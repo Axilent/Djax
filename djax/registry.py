@@ -29,7 +29,7 @@ def build_registry():
     """
     Builds the registry.
     """
-    from djax.content import AxilentContent
+    from djax.content import ACEContent
     
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
@@ -40,12 +40,12 @@ def build_registry():
                     module = getattr(app_module,'models')
                     for name, attribute in inspect.getmembers(module):
                         # log.debug('content registry examining module member %s.' % name)
-                        if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,AxilentContent):
+                        if inspect.isclass(attribute) and issubclass(attribute,Model) and issubclass(attribute,ACEContent):
                             # this is a content model, add to registry
                             try:
                                 log.info('Adding model %s to content registry.' % name)
-                                content_registry[attribute.Axilent.content_type] = attribute
+                                content_registry[attribute.ACE.content_type] = attribute
                             except AttributeError:
-                                raise MalformedRegistry('All Axilent content mappings must be defined with an "Axilent" inner class with a "content_type" attribute.')
+                                raise MalformedRegistry('All ACE content mappings must be defined with an "ACE" inner class with a "content_type" attribute.')
             except ImportError:
                 log.warn('Cannot import %s.  Skipping.' % app_path)

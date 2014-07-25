@@ -13,14 +13,14 @@ class Command(BaseCommand):
         make_option('--content-type',
                     dest='content_type',
                     default=None,
-                    help='The Axilent content type to sync.  If not specified then all the Axilent content will by synced.'),
+                    help='The ACE content type to sync.  If not specified then all the ACE content will by synced.'),
     )
     
     def handle(self,*args,**options):
         """
         Handler method.
         """
-        print 'Syncing local models with Axilent'
+        print 'Syncing local models with ACE'
         content_type = options.get('content_type',None)
         result = None
         if content_type:
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         else:
             result = sync_content()
         if result:
-            print 'Content model has been synced with Axilent'
+            print 'Content model has been synced with ACE'
         else:
             print '''Local model is sync-locked, suggesting a concurrent sync is underway.  
                      If you think this is an error, clear the lock by running "manage.py 
