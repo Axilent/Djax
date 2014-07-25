@@ -295,6 +295,8 @@ class AxilentContentRecord(models.Model):
         """
         Syncs the local content to the incoming axilent content (a dictionary).
         """
+        from djax.content import DefaultFieldConverter
+        
         local_model = self.get_local_model()
         field_map = local_model.ACE.field_map
         
