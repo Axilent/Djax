@@ -58,6 +58,8 @@ class AxilentContentRecordManager(models.Manager):
         """
         from djax.content import DefaultFieldConverter
         
+        log.debug('Creating new model of content type:%s and key:%s.' % (axilent_content_type,axilent_content_key))
+        
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
         local_model, record = None, None
         try:
