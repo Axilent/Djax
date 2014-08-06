@@ -60,6 +60,7 @@ class AxilentContentRecordManager(models.Manager):
         
         log.debug('Creating new model of content type:%s and key:%s.' % (axilent_content_type,axilent_content_key))
         
+        build_registry() # ensure registry is built
         content_data = content_client.get_content(axilent_content_type,axilent_content_key)
         local_model, record = None, None
         try:
