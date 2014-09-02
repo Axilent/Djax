@@ -32,6 +32,12 @@ class ContentImage(object):
             return self.data[attribute]
         except KeyError:
             raise AttributeError
+    
+    def __unicode__(self):
+        """
+        Show the data.
+        """
+        return unicode(self.data)
 
 class ChannelResult(object):
     """
