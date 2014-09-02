@@ -322,7 +322,9 @@ class AxilentContentRecord(models.Model):
                     # check nullable
                     if (hasattr(model_field,'accepts_null') and model_field.accepts_null) or hasattr(axilent_content,axilent_field):
                         # this is a nullable field converter or a non-null value
-                        value = model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field))
+                        value = None
+                        if hasattr(axilent_content,axilent_field): # for non-null fields, use the supplied value
+                            value = model_field.to_local_model(axilent_content,getattr(axilent_content,axilent_field))
                         setattr(local_model,model_field.field,value)
                     else:
                         log.info('Skipping non-nullable field %s - not in data from ACE.' % axilent_field)
