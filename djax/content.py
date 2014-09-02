@@ -290,6 +290,13 @@ class M2MFieldConverter(object):
         
         return key_list
 
+class WriteNullFieldConverter(DefaultFieldConverter):
+    """
+    Either writes the value supplied from ACE, or None to the local model.
+    """
+    accepts_null = True  
+
+
 # ======================
 # = Content Operations =
 # ======================
