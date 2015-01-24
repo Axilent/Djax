@@ -34,7 +34,6 @@ def build_mappings():
                     trigger_list = getattr(module,'triggers')
                     import_triggers(trigger_list)
             except ImportError:
-                log.exception('Import Error')
                 log.warn('Cannot import %s.triggermap. Skipping' % app_path)
 
 def import_triggers(trigger_list):
