@@ -60,6 +60,9 @@ class Trigger(object):
     def __unicode__(self):
         return u'%s : %s' % (self.category,self.action)
     
+    def __repr__(self):
+        return unicode(self)
+    
     def build_var_dict(self,params):
         """ 
         Builds the var dictionairy from the params.
