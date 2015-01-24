@@ -24,12 +24,14 @@ def build_mappings():
     """ 
     Builds the mappings for triggers.
     """
+    print 'building trigger mappings...'
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
                 app_module = get_module(app_path)
                 if hasattr(app_module,'triggermap'):
                     module = getattr(app_module,'triggermap')
+                    print 'found triggermap for',app_path
                     if hasattr(module,'triggers'):
                         trigger_list = getattr(module,'triggers')
                         import_triggers(trigger_list)
