@@ -28,13 +28,11 @@ def build_mappings():
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
-                app_module = get_module(app_path)
-                if hasattr(app_module,'triggermap'):
-                    module = getattr(app_module,'triggermap')
-                    print 'found triggermap for',app_path
-                    if hasattr(module,'triggers'):
-                        trigger_list = getattr(module,'triggers')
-                        import_triggers(trigger_list)
+                module = get_module('%s.triggermap')
+                print 'found triggermap for',app_path
+                if hasattr(module,'triggers'):
+                    trigger_list = getattr(module,'triggers')
+                    import_triggers(trigger_list)
             except ImportError:
                 log.warn('Cannot import %s. Skipping' % app_path)
 
