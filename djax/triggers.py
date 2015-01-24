@@ -127,4 +127,7 @@ def affinity_trigger(pattern,category,action,pk,model,**vars):
 # ================
 if hasattr(settings,'DJAX_TRIGGER_ASYNC') and settings.DJAX_TRIGGER_ASYNC:
     try:
-        
+        import celery
+    except ImportError:
+        raise Exception('You must have Celery installed in order to use DJAX_TRIGGER_ASYNC.')
+
