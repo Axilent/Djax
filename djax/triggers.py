@@ -42,6 +42,7 @@ def import_triggers(trigger_list):
     """
     for trigger_item in trigger_list:
         if isinstance(trigger_item,Trigger):
+            print 'adding trigger',trigger_item
             trigger_mappings.append(trigger_item)
         else:
             log.warn('Skipping non trigger item %s in trigger list.' % unicode(trigger_item))
@@ -55,6 +56,9 @@ class Trigger(object):
         self.action = action
         self.vars = vars
         self.regex = re.compile(pattern)
+    
+    def __unicode__(self):
+        return u'%s : %s' % (self.category,self.action)
     
     def build_var_dict(self,params):
         """ 
@@ -74,6 +78,7 @@ class Trigger(object):
         """ 
         Fires the param.
         """
+        print 'firing trigger',self
         from djax.models import ProfileRecord
         profile, profile_created = ProfileRecord.objects.for_request(request)
         if hasattr(settings,'DJAX_TRIGGER_ASYNC') and settings.DJAX_TRIGGER_ASYNC:

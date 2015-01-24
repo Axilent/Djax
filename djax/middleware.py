@@ -12,6 +12,7 @@ class TriggerMiddleware(object):
         """ 
         Processes the http request.  Will fire triggers for matching request paths.
         """
+        print 'in trigger middleware for',request.path
         for trigger in trigger_mappings:
             mo = trigger.regex.match(request.path)
             if mo:
