@@ -11,6 +11,7 @@ from djax.registry import content_registry, build_registry
 import re
 import threading
 import uuid
+from djax.triggers import build_mappings
 
 log = logging.getLogger('djax')
 
@@ -493,3 +494,4 @@ class AuthToken(models.Model):
 # = Registry Hook =
 # =================
 build_registry()
+build_mappings()
