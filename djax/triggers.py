@@ -28,7 +28,7 @@ def build_mappings():
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
-                module = get_module('%s.triggermap')
+                module = get_module('%s.triggermap' % app_path)
                 print 'found triggermap for',app_path
                 if hasattr(module,'triggers'):
                     trigger_list = getattr(module,'triggers')
