@@ -4,6 +4,9 @@ Trigger functionality for Djax.
 from django.conf import settings
 import re
 from djax.gateway import trigger_client
+import logging
+
+log = logging.getLogger('djax')
 
 trigger_mappings = []
 
@@ -89,6 +92,8 @@ class Trigger(object):
                                variables=var_dict,
                                environment={},
                                identity={})
+        
+        log.info('Fired trigger %s:%s (%s) ? %s' % (self.category,self.action,profile,unicode(var_dict)))
             
     
 class AffinityTrigger(Trigger):
