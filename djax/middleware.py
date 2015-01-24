@@ -2,7 +2,7 @@
 Middleware for Djax
 """
 import re
-from djax.triggers import trigger_mappings
+from djax import triggers
 
 class TriggerMiddleware(object):
     """ 
@@ -12,8 +12,12 @@ class TriggerMiddleware(object):
         """ 
         Processes the http request.  Will fire triggers for matching request paths.
         """
+        # Ensure trigger mappings
+        if not triggers.trigger_mappings:
+            triggers.build_mappings()
+        
         print 'in trigger middleware for',request.path
-        for trigger in trigger_mappings:
+        for trigger in triggers.trigger_mappings:
             mo = trigger.regex.match(request.path)
             if mo:
                 trigger.fire(mo.groupdict(),request)

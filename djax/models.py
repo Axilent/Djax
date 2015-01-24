@@ -494,4 +494,3 @@ class AuthToken(models.Model):
 # = Registry Hook =
 # =================
 build_registry()
-build_mappings()
