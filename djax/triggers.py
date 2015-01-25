@@ -24,12 +24,12 @@ def build_mappings():
     """ 
     Builds the mappings for triggers.
     """
-    print 'building trigger mappings...'
+    log.info('Building trigger mappings...')
     for app_path in settings.INSTALLED_APPS:
         if not ('djax' in app_path):
             try:
                 module = get_module('%s.triggermap' % app_path)
-                print 'found triggermap for',app_path
+                log.debug('Found triggermap for %s.' % app_path)
                 if hasattr(module,'triggers'):
                     trigger_list = getattr(module,'triggers')
                     import_triggers(trigger_list)
@@ -42,7 +42,7 @@ def import_triggers(trigger_list):
     """
     for trigger_item in trigger_list:
         if isinstance(trigger_item,Trigger):
-            print 'adding trigger',trigger_item
+            log.debug('Adding trigger %s.' % unicode(trigger_item))
             trigger_mappings.append(trigger_item)
         else:
             log.warn('Skipping non trigger item %s in trigger list.' % unicode(trigger_item))
@@ -81,7 +81,6 @@ class Trigger(object):
         """ 
         Fires the param.
         """
-        print 'firing trigger',self
         profile_created = False
         from djax.models import ProfileRecord
         if not profile:
