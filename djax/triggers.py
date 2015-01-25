@@ -77,18 +77,22 @@ class Trigger(object):
         
         return var_dict
     
-    def fire(self,params,request):
+    def fire(self,params,request,profile=None):
         """ 
         Fires the param.
         """
         print 'firing trigger',self
+        profile_created = False
         from djax.models import ProfileRecord
-        profile, profile_created = ProfileRecord.objects.for_request(request)
+        if not profile:
+            profile, profile_created = ProfileRecord.objects.for_request(request)
         if hasattr(settings,'DJAX_TRIGGER_ASYNC') and settings.DJAX_TRIGGER_ASYNC:
             from djax.tasks import trigger_async
             trigger_async.delay(self,profile.profile,self.build_var_dict(params))
         else:
             self._send_trigger(profile.profile,self.build_var_dict(params))
+        
+        return profile, profile_created
     
     def _send_trigger(self,profile,var_dict):
         """ 
