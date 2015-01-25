@@ -26,7 +26,6 @@ class TriggerMiddleware(object):
         pr, pr_created = ProfileRecord.objects.for_request(request)
         
         for trigger in triggers.trigger_mappings:
-            log.debug('Evaluating trigger %s.' % unicode(trigger))
             mo = trigger.regex.match(request.path[1:])
             if mo:
                 trigger.fire(mo.groupdict(),request,pr)
