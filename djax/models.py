@@ -426,7 +426,7 @@ class ProfileRecordManager(models.Manager):
         Gets or creates a profile record for the user.  User may not be anonymous for this call.
         """
         if user.is_anonymous():
-            raise ValueError('You cannon use an anonymous user for the ProfileRecord.objects.for_user() method.')
+            raise ValueError('You cannont use an anonymous user for the ProfileRecord.objects.for_user() method.')
         
         try:
             return (self.get(user=user).profile,False)
