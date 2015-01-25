@@ -68,7 +68,7 @@ class Trigger(object):
         Builds the var dictionairy from the params.
         """
         var_dict = {}
-        for key, value in self.vars:
+        for key, value in self.vars.items():
             if value.startswith('$'):
                 param_key = value[1:]
                 var_dict[key] = params[param_key]
