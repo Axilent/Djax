@@ -86,9 +86,9 @@ class Trigger(object):
         profile, profile_created = ProfileRecord.objects.for_request(request)
         if hasattr(settings,'DJAX_TRIGGER_ASYNC') and settings.DJAX_TRIGGER_ASYNC:
             from djax.tasks import trigger_async
-            trigger_async.delay(self,profile,build_var_dict(params))
+            trigger_async.delay(self,profile,self.build_var_dict(params))
         else:
-            self._send_trigger(profile,build_var_dict(params))
+            self._send_trigger(profile,self.build_var_dict(params))
     
     def _send_trigger(self,profile,var_dict):
         """ 
