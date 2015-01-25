@@ -19,7 +19,7 @@ class TriggerMiddleware(object):
         print 'in trigger middleware for',request.path
         for trigger in triggers.trigger_mappings:
             print 'evaluating trigger',trigger
-            mo = trigger.regex.match(request.path)
+            mo = trigger.regex.match(request.path[1:])
             if mo:
                 trigger.fire(mo.groupdict(),request)
         
