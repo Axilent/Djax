@@ -10,7 +10,7 @@ class AxilentConnection(object):
     """
     A connection with Axilent.
     """
-    def __init__(self,apikey,api_version='beta3',endpoint='https://www.axilent.net'):
+    def __init__(self,apikey,api_version='astoria',endpoint='https://www.axilent.net'):
         self.apikey = apikey
         self.version = api_version
         self.endpoint = endpoint

@@ -20,7 +20,7 @@ _endpoint = 'https://www.axilent.net'
 if hasattr(settings,'AXILENT_ENDPOINT') and settings.AXILENT_ENDPOINT:
     _endpoint = settings.AXILENT_ENDPOINT
 
-_api_version = 'beta3'
+_api_version = 'astoria'
 if hasattr(settings,'AXILENT_API_VERSION') and settings.AXILENT_API_VERSION:
     _api_version = settings.AXILENT_API_VERSION
 
