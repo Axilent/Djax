@@ -1,4 +1,4 @@
 """
 Top level package for Djax.
 """
-VERSION = (0,8)
+VERSION = (0,8,1)
