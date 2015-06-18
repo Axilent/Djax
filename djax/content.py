@@ -368,6 +368,45 @@ def sync_content(token=None,content_type_to_sync=None):
     lock.delete()
     return True # sync occured
 
+def sync_library_to_content_type(content_type):
+    """ 
+    Syncs the ACE library to the specified content type.
+    """
+    content_model = content_registry[content_type]
+    for item in content_model.objects.all():
+        item.push_to_library()
+
+def sync_library(token=None,content_type_to_sync=None):
+    """ 
+    Synchronizes the ACE library with the local content.
+    """
+    from djax.models import ContentSyncLock
+    
+    if ContentSyncLock.objects.all().exists():
+        return False
+    
+    if not token:
+        token = uuid.uuid4().hex
+    
+    lock = ContentSyncLock.objects.create(token=token)
+    
+    # ensure registry loaded
+    build_registry()
+    
+    if content_type_to_sync:
+        log.info('Pushing %s content to ACE library.' % content_type_to_sync)
+        try:
+            content_type = content_registry[content_type_to_sync]
+            sync_library_to_content_type(content_type_to_sync)
+        except KeyError:
+            log.error('%s is not in the content registry.' % content_type_to_sync)
+    else:
+        for content_type in content_registry.keys():
+            sync_library_to_content_type(content_type)
+    
+    lock.delete()
+    return True
+
 # ===================
 # = Content Channel =
 # ===================
