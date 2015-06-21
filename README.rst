@@ -13,6 +13,19 @@ as a CMS for a Django website. It also provides easy integration with
 ACE's targeting Content Channels, and provides integration with ACE's
 user profiling system.
 
+Installation
+~~~~~~~~~~~~
+
+To install Djax with Pip:
+
+::
+
+    pip install Djax
+
+Then, add ``djax`` to your ``INSTALLED_APPS``.
+
+Finally, you will need to ``syncdb`` to generate Djax's tables.
+
 Integrating ACE Published Content With Django
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -338,3 +351,29 @@ ACEContent.trigger\_ban
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Sends a ban trigger for this content to ACE.
+
+Setting Up Djax and ACE to Handle User-Generated Content
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A common scenario is User Generated Content (UGC), in which user's of
+the website create content, in the form of Django models, which then
+needs to be pushed back into the ACE library for administrative review.
+Djax and ACE now support this round-trip model for content.
+
+In the ACE project, first create a new **Content Source** for the
+Content Type that you want to round-trip. Content Sources are found in
+the settings panel, for each content type under the Content Types
+section of the ACE project.
+
+The new Content Source should be of the type **Djax User Generated
+Content**. When creating the Content Source, you will need to set the
+refresh interval, the URL pointing to the Djax install, and an auth
+token.
+
+In your code, you set up your model as ``ACEContent`` as usual, defining
+the ACE content type and the field map in the ``ACE`` subclass.
+
+Everytime the Content Source passes the refresh interval, it will query
+your Djax install. At this point the Djax install will push the content
+into the ACE library, either creating new content items or updating
+existing ones.
