@@ -402,7 +402,7 @@ def sync_library(token=None,content_type_to_sync=None):
             log.error('%s is not in the content registry.' % content_type_to_sync)
     else:
         for content_type in content_registry.keys():
-            log.info('Pushing %s content to ACE library.' % content_type.ACE.content_type)
+            log.info('Pushing %s content to ACE library.' % content_type)
             sync_library_to_content_type(content_type)
     
     lock.delete()
