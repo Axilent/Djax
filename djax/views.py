@@ -38,12 +38,14 @@ def phone_home(request,token=None):
     Initiates a content sync as long as there is no existing sync lock.
     """
     sync_content(token)
+    return HttpResponse('OK')
 
 def refresh_library(request,token=None):
     """ 
     Initiates a push to the ACE library from the local content.
     """
     sync_library(token)
+    return HttpResponse('OK')
 
 @check_auth
 def sync_record_view(request):
