@@ -7,6 +7,15 @@ Djax integrates the Django web framework with [Axilent ACE](http://www.axilent.c
 
 Djax links Django models with ACE content types, enabling the use of ACE as a CMS for a Django website.  It also provides easy integration with ACE's targeting Content Channels, and provides integration with ACE's user profiling system.
 
+###Installation
+To install Djax with Pip:
+
+	pip install Djax
+
+Then, add `djax` to your `INSTALLED_APPS`.
+
+Finally, you will need to `syncdb` to generate Djax's tables.
+
 ###Integrating ACE Published Content With Django
 
 In order to use content that is authored our sourced in ACE in a Django website, integrate the desired Django model with Djax using the ACEContent mixin.
