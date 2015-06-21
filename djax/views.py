@@ -1,7 +1,7 @@
 """
 Views for Djax.
 """
-from djax.content import sync_content, sync_record
+from djax.content import sync_content, sync_record, sync_library
 from django.http import HttpResponse
 import base64
 from djax.models import AuthToken
@@ -38,6 +38,14 @@ def phone_home(request,token=None):
     Initiates a content sync as long as there is no existing sync lock.
     """
     sync_content(token)
+    return HttpResponse('OK')
+
+def refresh_library(request,token=None):
+    """ 
+    Initiates a push to the ACE library from the local content.
+    """
+    sync_library(token)
+    return HttpResponse('OK')
 
 @check_auth
 def sync_record_view(request):
