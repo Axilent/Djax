@@ -104,7 +104,7 @@ The integration can be implemented without any special work using Djax:
           class ACE:
              content_type = 'Article'
              field_map = {
-                 'author','author',
+                 'author':'author',
                  'title':'title',
                  'body':'body',
              }
@@ -138,7 +138,7 @@ step is required with Djax integration:
           class ACE:
              content_type = 'Article'
              field_map = {
-                 'author',NullableForeignKeyConverter('author'),
+                 'author':NullableForeignKeyConverter('author'),
                  'title':'title',
                  'body':'body',
              }
