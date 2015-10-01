@@ -437,7 +437,7 @@ class ContentChannel(object):
         
         return p
     
-    def get_content(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0):
+    def get_content(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0,include_endorsements=False):
         """
         Gets content.  Flavor and limit params will override the defaults.
         Extracts relevant content from the supplied queryset.
@@ -456,23 +456,29 @@ class ContentChannel(object):
         
         results = self.api.channel(channel_slug,**params)
         
+        queryset_keys = queryset.values_list('id',flat=True)
+        
         return_set = []
         
         for content_item in results.items:
             try:
                 record = AxilentContentRecord.objects.get(axilent_content_type=content_item.content_type,
-                                                          axilent_content_key=content_item.key)
-                return_set.append(record.get_local_model())
+                                                          axilent_content_key=content_item.key,
+                                                          local_id__in=queryset_keys)
+                if include_endorsements:
+                    return_set.append(ContentItemWrapper(record.get_local_model(),content_item.endorsement))
+                else:
+                    return_set.append(record.get_local_model())
             except AxilentContentRecord.DoesNotExist:
                 log.warn('No local record of %s:%s, referenced by Content Channel %s' % (axl_content_type,content_item.key,self.name))
             
         return return_set
     
-    def __call__(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0):
+    def __call__(self,queryset,channel=None,profile=None,basekey=None,flavor=None,limit=0,include_endorsements=False):
         """
         Function hook - passes through to get_content.
         """
-        return self.get_content(queryset,channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
+        return self.get_content(queryset,channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit,include_endorsements=include_endorsements)
 
 # ===========================================
 # = Manager class provides Search Interface =
@@ -504,4 +510,35 @@ class ContentManager(Manager):
             raise ValueError('Content Channel not defined.  You must either specify it as an argument, or pass a default channel to the constructor.')
         
         return self._channel(self.all(),channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit)
-        
+    
+    def channel_sort(self,queryset,channel=channel,profile=None,basekey=None,flavor=None,limit=0):
+        """
+        Sorts the passed queryset by rlevel, with the most relevant results first.
+        """
+        channel_results = self._channel(queryset,channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit,include_endorsements=True)
+        remainder_results = queryset.exclude(pk__in=[item.pk for item in channel_results])
+        final_results = channel_results + [ContentItemWrapper(item,0) for item in remainder_results]
+        final_results.sort(cmp=lambda x,y: cmp(x.rlevel,y.rlevel))
+        return final_results
+
+class ContentItemWrapper(object):
+    """
+    Wrapper for a content item that contains an rlevel as returned
+    by a specific content channel call.
+    """
+    def __init__(self,item,rlevel):
+        self.item = item
+        self.rlevel = rlevel
+    
+    def __getattr__(self,name):
+        if name == 'rlevel':
+            return self.rlevel
+        else:
+            return getattr(self.item,name)
+    
+    def __setattr__(self,name,value):
+        if name == 'rlevel':
+            self.rlevel = value
+        else:
+            setattr(self.item,name,value)
+
