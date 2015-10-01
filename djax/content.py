@@ -518,7 +518,7 @@ class ContentManager(Manager):
         channel_results = self._channel(queryset,channel=channel,profile=profile,basekey=basekey,flavor=flavor,limit=limit,include_endorsements=True)
         remainder_results = queryset.exclude(pk__in=[item.pk for item in channel_results])
         final_results = channel_results + [ContentItemWrapper(item,0) for item in remainder_results]
-        final_results.sort(cmp=lambda x,y: cmp(x.rlevel,y.rlevel))
+        final_results.sort(cmp=lambda x,y: cmp(y.rlevel,x.rlevel))
         return final_results
 
 class ContentItemWrapper(object):
