@@ -528,8 +528,8 @@ class ContentItemWrapper(object):
     """
     
     def __init__(self,item,rlevel):
-        object.__setattribute__(self,'item',item)
-        object.__setattribute__(self,'rlevel',rlevel)
+        object.__setattr__(self,'item',item)
+        object.__setattr__(self,'rlevel',rlevel)
     
     def __getattr__(self,name):
         return getattr(self.item,name)
