@@ -533,12 +533,16 @@ class ContentItemWrapper(object):
     def __getattr__(self,name):
         if name == 'rlevel':
             return self.rlevel
+        elif name == 'item':
+            return self.item
         else:
             return getattr(self.item,name)
     
     def __setattr__(self,name,value):
         if name == 'rlevel':
             self.rlevel = value
+        elif name == 'item':
+            self.item = value
         else:
             setattr(self.item,name,value)
 
