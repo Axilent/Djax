@@ -526,11 +526,10 @@ class ContentItemWrapper(object):
     Wrapper for a content item that contains an rlevel as returned
     by a specific content channel call.
     """
-    __slots__ = ['item','rlevel']
     
     def __init__(self,item,rlevel):
-        self.item = item
-        self.rlevel = rlevel
+        object.__setattribute__(self,'item',item)
+        object.__setattribute__(self,'rlevel',rlevel)
     
     def __getattr__(self,name):
         return getattr(self.item,name)
