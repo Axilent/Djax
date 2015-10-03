@@ -520,13 +520,27 @@ class ContentManager(Manager):
         final_results = channel_results + [ContentItemWrapper(item,0) for item in remainder_results]
         final_results.sort(cmp=lambda x,y: cmp(y.rlevel,x.rlevel))
         return final_results
+    
+    def freeze(self,results):
+        """
+        Freezes the results, returning a frozen sort key. Results must be
+        endorsed content items from channel_sort.
+        """
+        return FrozenSort.objects.freeze(results)
+    
+    def get_frozen_sort(self,key):
+        """
+        Gets channels results from a frozen sort.  Will raise FrozenSort.DoesNotExist
+        if the key doesn't match any frozen sorts.
+        """
+        fs = FrozenSort.objects.get(key=key)
+        return fs.sorted_results()
 
 class ContentItemWrapper(object):
     """
     Wrapper for a content item that contains an rlevel as returned
     by a specific content channel call.
     """
-    
     def __init__(self,item,rlevel):
         object.__setattr__(self,'item',item)
         object.__setattr__(self,'rlevel',rlevel)

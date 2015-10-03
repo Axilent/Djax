@@ -489,6 +489,60 @@ class AuthToken(models.Model):
     def __unicode__(self):
         return self.token
 
+class FrozenSortManager(models.Manager):
+    """
+    Manager class for frozen sort.
+    """
+    def freeze(self,results):
+        """
+        Creates a new frozen sort.  Returns the key of the newly created frozen sort.
+        """
+        fs = self.create(key=uuid.uuid4().hex,created=datetime.now())
+        order = 0
+        for result in results:
+            FrozenSortElement.objects.create(frozen_sort=fs,
+                                             order=order,
+                                             content=AxilentContentRecord.objects.get_record(result.item),
+                                             rlevel=result.rlevel)
+            order += 1
+        return fs.key
+
+class FrozenSort(models.Model):
+    """
+    For freezing the results of a channel sort.
+    """
+    key = models.CharField(max_length=100)
+    created = models.DateTimeField()
+    
+    def __unicode__(self):
+        return u'%s:%s' % (self.key,unicode(self.created))
+        
+    def sorted_results(self):
+        """
+        Returns a list of ContentItemWrappers.
+        """
+        from djax.content import ContentItemWrapper
+        return [ContentItemWrapper(element.local_model(),element.rlevel) for element in self.elements.all()]
+
+class FrozenSortElement(models.Model):
+    """
+    An element in a frozen sort.
+    """
+    frozen_sort = models.ForeignKey(FrozenSort,related_name='elements')
+    order = models.IntegerField()
+    content = models.ForeignKey(AxilentContentRecord)
+    rlevel = models.IntegerField(default=0)
+    
+    def local_model(self):
+        """
+        Gets the associated local model.
+        """
+        return self.content.get_local_model()
+    
+    class Meta:
+        unique_together = (('frozen_sort','order'),)
+        ordering = ['order']
+
 
 # =================
 # = Registry Hook =
