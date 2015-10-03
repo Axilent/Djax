@@ -526,6 +526,7 @@ class ContentManager(Manager):
         Freezes the results, returning a frozen sort key. Results must be
         endorsed content items from channel_sort.
         """
+        from djax.models import FrozenSort
         return FrozenSort.objects.freeze(results)
     
     def get_frozen_sort(self,key):
@@ -533,6 +534,7 @@ class ContentManager(Manager):
         Gets channels results from a frozen sort.  Will raise FrozenSort.DoesNotExist
         if the key doesn't match any frozen sorts.
         """
+        from djax.models import FrozenSort
         fs = FrozenSort.objects.get(key=key)
         return fs.sorted_results()
 
