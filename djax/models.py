@@ -514,6 +514,8 @@ class FrozenSort(models.Model):
     key = models.CharField(max_length=100)
     created = models.DateTimeField()
     
+    objects = FrozenSortManager()
+    
     def __unicode__(self):
         return u'%s:%s' % (self.key,unicode(self.created))
         
