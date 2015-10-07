@@ -521,6 +521,15 @@ class ContentManager(Manager):
         final_results.sort(cmp=lambda x,y: cmp(y.rlevel,x.rlevel))
         return final_results
     
+    def search_sort(self,queryset,query):
+        """
+        Reorders queryset based on matching items from search query.
+        """
+        search_results = self.search(query).filter(pk__in=[item.pk for item in queryset])
+        remainder_results = queryset.exclude(pk__in=[item.pk for item in search_results])
+        final_results = search_results + remainder_results
+        return final_results
+    
     def freeze(self,results):
         """
         Freezes the results, returning a frozen sort key. Results must be
