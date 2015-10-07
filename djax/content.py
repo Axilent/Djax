@@ -527,7 +527,7 @@ class ContentManager(Manager):
         """
         search_results = self.search(query).filter(pk__in=[item.pk for item in queryset])
         remainder_results = queryset.exclude(pk__in=[item.pk for item in search_results])
-        final_results = search_results + remainder_results
+        final_results = [item for item in search_results] + [item for item in remainder_results]
         return final_results
     
     def freeze(self,results):
