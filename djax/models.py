@@ -3,7 +3,6 @@ Models for Djax.
 """
 from django.db import models, IntegrityError
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
 from django.conf import settings
 import logging
 from datetime import datetime
