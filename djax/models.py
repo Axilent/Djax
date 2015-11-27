@@ -3,7 +3,7 @@ Models for Djax.
 """
 from django.db import models, IntegrityError
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User
+from django.conf import settings
 import logging
 from datetime import datetime
 from djax.gateway import content_client, library_client, library_project, trigger_client
@@ -458,7 +458,7 @@ class ProfileRecord(models.Model):
     """
     A record associating a Django user with an ACE profile.
     """
-    user = models.ForeignKey(User,related_name='ace_profile_record',unique=True,null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,related_name='ace_profile_record',unique=True,null=True)
     profile = models.CharField(max_length=100)
     
     objects = ProfileRecordManager()
